@@ -1,0 +1,13 @@
+[gd_scene format=2]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+margin_right = 1024.0
+margin_bottom = 50.0
+text = "Score: 00000000"
+__meta__ = {
+"_edit_use_anchors_": false
+}
