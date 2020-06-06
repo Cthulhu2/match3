@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="GameScene\ItemTable.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="LibGameEngine\LibGameEngine.csproj">
