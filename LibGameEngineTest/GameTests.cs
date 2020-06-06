@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 
 // ReSharper disable CheckNamespace
-
 
 namespace GameEngine
 {
@@ -71,6 +69,23 @@ namespace GameEngine
                     }
                 }
             }
+        }
+
+        [Test]
+        public void GameOver()
+        {
+            var game = new Game(new Board());
+            game.Reset();
+            for (int i = 0; i < Game.GameDurationSec; i++)
+            {
+                game.Tick();
+            }
+
+            Assert.False(game.IsGameOver);
+
+            game.Tick();
+
+            Assert.True(game.IsGameOver);
         }
     }
 }

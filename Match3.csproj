@@ -53,8 +53,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameOver\BtnOk.cs" />
-    <Compile Include="MainMenu\BtnPlay.cs" />
+    <Compile Include="GameOver\GameOver.cs" />
+    <Compile Include="GameScene\GameScene.cs" />
+    <Compile Include="MainMenu\MainMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

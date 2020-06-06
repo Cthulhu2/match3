@@ -74,7 +74,7 @@ namespace GameEngine
                 ItemType = ItemTypes[_rnd.Next(ItemTypes.Length)],
             };
         }
-        
+
         public void Reset()
         {
             for (int y = 0; y < Height; y++)
@@ -99,7 +99,7 @@ namespace GameEngine
         public Item RemoveAt(Point p)
         {
             Item item = Items[p.X, p.Y];
-            
+
             Items[p.X, p.Y] = null;
 
             return item;
@@ -108,13 +108,14 @@ namespace GameEngine
         public string Dump()
         {
             var sb = new StringBuilder();
-            
+
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     sb.Append(Items[x, y].Dump()).Append(" ");
                 }
+
                 sb.Append(Environment.NewLine);
             }
 
@@ -122,16 +123,25 @@ namespace GameEngine
         }
     }
 
-    public class Game : IDisposable
+    public class Game
     {
+        public const int GameDurationSec = 60;
+
         private readonly Board _board;
 
-        public int Scores { get; private set; }
+        private int _timeLeftSec;
 
         public Game(Board board)
         {
             _board = board;
+            _timeLeftSec = GameDurationSec;
         }
+
+        public int TimeLeftSec => _timeLeftSec;
+
+        public int Scores { get; private set; }
+
+        public bool IsGameOver => _timeLeftSec < 0;
 
         public Item[,] Items => _board.Items;
 
@@ -141,11 +151,12 @@ namespace GameEngine
             _board.Reset();
         }
 
-        public void NextTurn()
+        public void Tick()
         {
+            _timeLeftSec--;
         }
 
-        public void Dispose()
+        public void NextTurn()
         {
         }
 

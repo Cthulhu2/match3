@@ -1,13 +1,43 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://GameScene/GameScene.cs" type="Script" id=1]
 
 [node name="Node2D" type="Node2D"]
+script = ExtResource( 1 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Label" type="Label" parent="CanvasLayer"]
+[node name="Background" type="ColorRect" parent="CanvasLayer"]
 margin_right = 1024.0
-margin_bottom = 50.0
-text = "Score: 00000000"
+margin_bottom = 600.0
+color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="LblScores" type="Label" parent="CanvasLayer"]
+margin_right = 512.0
+margin_bottom = 50.0
+text = "Score: 00000000"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblTime" type="Label" parent="CanvasLayer"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_right = 512.0
+margin_bottom = 50.0
+text = "Time left: 0 seconds"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 60.0
+autostart = true
