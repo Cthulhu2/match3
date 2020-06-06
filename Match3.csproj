@@ -66,5 +66,11 @@
   <ItemGroup>
     <Content Include=".gitignore" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="LibGameEngine\LibGameEngine.csproj">
+      <Project>{f58f416a-3795-49bd-b946-5a000730a5c1}</Project>
+      <Name>LibGameEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

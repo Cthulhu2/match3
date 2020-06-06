@@ -1,6 +1,15 @@
 ﻿# JetBrains Rider
 .idea/
 
+# LibGameEngine builds
+**/obj/Debug/
+**/obj/Release/
+**/bin/Debug/
+**/bin/Release/
+
+# NuGet packages
+packages/
+
 # Godot-specific ignores
 .import/
 export.cfg
