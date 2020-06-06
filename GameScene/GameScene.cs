@@ -1,3 +1,4 @@
+using System.Drawing;
 using GameEngine;
 using Godot;
 
@@ -11,19 +12,26 @@ public class GameScene : Node2D
 
     private Timer _timer;
 
+    private ItemSelTween _itemSelTween;
+    private Sprite _selSprite;
+    private Point _selSpritePoint;
+
     private Label _lblScores;
     private Label _lblTime;
     private TextureRect _itemTable;
+    private Sprite[,] _itemSprites;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         _game = new Game(new Board());
         _game.Reset();
+        _itemSprites = new Sprite[Board.Width,Board.Height];
 
         _lblScores = GetNode<Label>(new NodePath("Canvas/LblScores"));
         _lblTime = GetNode<Label>(new NodePath("Canvas/LblTime"));
         _itemTable = GetNode<TextureRect>(new NodePath("Canvas/ItemTable"));
+        _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
 
         _timer = GetNode<Timer>(new NodePath("Timer"));
         _timer.WaitTime = 1; // sec
@@ -40,6 +48,45 @@ public class GameScene : Node2D
 //  {
 //      
 //  }
+
+    private void OnSpriteClicked(int x, int y)
+    {
+        if (_selSpritePoint == new Point(x, y))
+        {
+            return;
+        }
+
+        _selSprite = _itemSprites[x, y];
+        _selSpritePoint = new Point(x, y);
+
+        _itemSelTween.Tween(_selSprite);
+    }
+    
+    public override void _Input(InputEvent evt)
+    {
+        if (!(evt is InputEventMouseButton))
+        {
+            return;
+        }
+        var mEvt = (InputEventMouseButton) evt;
+        if (!evt.IsPressed()
+            || !_itemTable.GetGlobalRect().HasPoint(mEvt.Position))
+        {
+            return;
+        }
+        
+        for (int y = 0; y < Board.Height; y++)
+        {
+            for (int x = 0; x < Board.Width; x++)
+            {
+                Sprite s = _itemSprites[x, y];
+                if (s.GetRect().HasPoint(s.ToLocal(mEvt.Position)))
+                {
+                    OnSpriteClicked(x, y);
+                }
+            }
+        }
+    }
 
     private void UpdLblTime()
     {
@@ -107,6 +154,7 @@ public class GameScene : Node2D
                 itemSprite.Scale = new Vector2(5, 5);
                 itemSprite.Visible = true;
                 itemSprite.Position = ToItemTablePos(x, y);
+                _itemSprites[x, y] = itemSprite;
                 _itemTable.AddChild(itemSprite);
             }
         }
