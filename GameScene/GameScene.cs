@@ -15,10 +15,11 @@ public class GameScene : Node2D
 
     private ItemSelTween _itemSelTween;
     private Sprite _selSprite;
-    private Point _selSpritePoint = Point.Empty;
+    private Point _selSpritePoint = new Point(-1, -1);
 
     private ItemHMovTween _itemHMovTween;
     private ItemVMovTween _itemVMovTween;
+    private ItemFallTween _itemFallTween;
     private ItemDestroyTween _itemDestroyTween;
 
     private Label _lblScores;
@@ -44,9 +45,10 @@ public class GameScene : Node2D
         _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
         _itemHMovTween = GetNode<ItemHMovTween>(new NodePath("ItemHMovTween"));
         _itemVMovTween = GetNode<ItemVMovTween>(new NodePath("ItemVMovTween"));
+        _itemFallTween = GetNode<ItemFallTween>(new NodePath("ItemFallTween"));
         _itemDestroyTween =
             GetNode<ItemDestroyTween>(new NodePath("ItemDestroyTween"));
-        
+
 
         _timer = GetNode<Timer>(new NodePath("Timer"));
         _timer.WaitTime = 1; // sec
@@ -99,7 +101,7 @@ public class GameScene : Node2D
         IAction[] actions = _game.Swap(_selSpritePoint, new Point(x, y));
 
         _selSprite = null;
-        _selSpritePoint = Point.Empty;
+        _selSpritePoint = new Point(-1, -1);
 
         _itemSelTween.TerminateAll();
 
@@ -134,14 +136,40 @@ public class GameScene : Node2D
             ProcessNextAction();
             return;
         }
+
+        GD.Print($"OnDestroyActionEnd. Remove: {dAct.Positions}");
         foreach (Point dPos in dAct.Positions)
         {
             Sprite sprite = _itemSprites[dPos.X, dPos.Y];
             _itemSprites[dPos.X, dPos.Y] = null;
             _itemTable.RemoveChild(sprite);
-            GD.Print($"OnDestroyActionEnd. Remove: {dPos}");
         }
-        GD.Print("OnDestroyActionEnd. Dump:");
+
+        // GD.Print("OnDestroyActionEnd. Dump:");
+        // foreach (string l in _game.Dump().Split(System.Environment.NewLine))
+        // {
+        //     GD.Print(l);
+        // }
+        ProcessNextAction();
+    }
+
+    public void OnFallDownActionEnd()
+    {
+        _itemFallTween.TerminateAll();
+        if (!(_curAction is FallDownAction fAct))
+        {
+            GD.PrintErr($"OnFallDownActionEnd. Unknown action: {_curAction}");
+            ProcessNextAction();
+            return;
+        }
+
+        foreach (FallDownPos fPos in fAct.Positions)
+        {
+            Sprite sprite = _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y];
+            _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y] = null;
+            _itemSprites[fPos.DestPos.X, fPos.DestPos.Y] = sprite;
+        }
+        GD.Print("OnFallDownActionEnd. Dump:");
         foreach (string l in _game.Dump().Split(System.Environment.NewLine))
         {
             GD.Print(l);
@@ -184,8 +212,21 @@ public class GameScene : Node2D
             {
                 _itemDestroyTween.Tween(_itemSprites[dPos.X, dPos.Y]);
             }
+
             _itemDestroyTween.InterpolateCallback(this, "OnDestroyActionEnd");
             _itemDestroyTween.Start();
+        }
+        else if (action is FallDownAction fAct)
+        {
+            foreach (FallDownPos fPos in fAct.Positions)
+            {
+                Sprite sprite = _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y];
+                Vector2 toPos = ToItemTablePos(fPos.DestPos.X, fPos.DestPos.Y);
+                _itemFallTween.Tween(sprite, toPos);
+            }
+
+            _itemFallTween.InterpolateCallback(this, "OnFallDownActionEnd");
+            _itemFallTween.Start();
         }
         else
         {

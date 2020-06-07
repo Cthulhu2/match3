@@ -34,6 +34,44 @@ namespace GameEngine
         public Point[] Positions { get; set; }
     }
 
+    public class FallDownPos
+    {
+        public Point SrcPos { get; }
+        public Point DestPos { get; }
+
+        public FallDownPos(Point src, Point dest)
+        {
+            SrcPos = src;
+            DestPos = dest;
+        }
+        
+        protected bool Equals(FallDownPos other)
+        {
+            return SrcPos.Equals(other.SrcPos) && DestPos.Equals(other.DestPos);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((FallDownPos) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (SrcPos.GetHashCode() * 397) ^ DestPos.GetHashCode();
+            }
+        }
+    }
+
+    public class FallDownAction : IAction
+    {
+        public FallDownPos[] Positions { get; set; }
+    }
+
     public class ItemType
     {
         public int Color { get; set; }
@@ -246,6 +284,7 @@ namespace GameEngine
                             match3.ForEach(p => matches.Add(p));
                         }
                     }
+
                     if (y < Height - 2)
                     {
                         List<Point> match3 = TestMatch3V(x, y);
@@ -253,11 +292,50 @@ namespace GameEngine
                         {
                             match3.ForEach(p => matches.Add(p));
                         }
-                    }                    
+                    }
                 }
             }
 
             return matches;
+        }
+
+        private Point FindUpperFirst(int x, int y)
+        {
+            for (int testY = y; testY >= 0; testY--)
+            {
+                if (Items[x, testY] != null)
+                {
+                    return new Point(x, testY);
+                }
+            }
+
+            return new Point(-1, -1);
+        }
+
+        public List<FallDownPos> CalcFallDownPositions()
+        {
+            var positions = new List<FallDownPos>();
+
+            // From Down to Up
+            for (int y = Height - 1; y > 0; y--)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (Items[x, y] == null)
+                    {
+                        var emptyPos = new Point(x, y);
+
+                        Point upPos = FindUpperFirst(x, y);
+                        if (upPos != new Point(-1, -1))
+                        {
+                            Swap(upPos, emptyPos);
+                            positions.Add(new FallDownPos(upPos, emptyPos));
+                        }
+                    }
+                }
+            }
+
+            return positions;
         }
 
         public int Width
@@ -376,6 +454,15 @@ namespace GameEngine
                 foreach (Point m in matches)
                 {
                     Items[m.X, m.Y] = null;
+                }
+
+                List<FallDownPos> fallDown = _board.CalcFallDownPositions();
+                if (fallDown.Count > 0)
+                {
+                    actions.Add(new FallDownAction
+                    {
+                        Positions = fallDown.ToArray()
+                    });
                 }
             }
 
