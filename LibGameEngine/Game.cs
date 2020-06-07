@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 
+// ReSharper disable ArrangeAccessorOwnerBody
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -16,22 +18,26 @@ namespace GameEngine
 
     public interface IAction
     {
-
     }
 
     public class SwapAction : IAction
     {
         public Point SrcPos { get; set; }
         public Item SrcItem { get; set; }
-        
+
         public Point DestPos { get; set; }
         public Item DestItem { get; set; }
     }
-    
+
+    public class DestroyAction : IAction
+    {
+        public Point[] Positions { get; set; }
+    }
+
     public class ItemType
     {
-        public int Color { get; internal set; }
-        public ItemShape Shape { get; internal set; }
+        public int Color { get; set; }
+        public ItemShape Shape { get; set; }
 
         public string Dump()
         {
@@ -45,11 +51,32 @@ namespace GameEngine
                     return "nil";
             }
         }
+
+        public static bool AreEquals(ItemType t1, ItemType t2, ItemType t3)
+        {
+            return t1 != null && t2 != null && t3 != null
+                   && t1.Shape == t2.Shape && t1.Color == t2.Color
+                   && t1.Shape == t3.Shape && t1.Color == t3.Color;
+        }
     }
 
     public class Item
     {
-        public ItemType ItemType { get; internal set; }
+        public ItemType ItemType { get; set; }
+
+        public Item()
+        {
+            //
+        }
+
+        public Item(int color, ItemShape shape)
+        {
+            ItemType = new ItemType
+            {
+                Color = color,
+                Shape = shape,
+            };
+        }
 
         public string Dump()
         {
@@ -59,9 +86,9 @@ namespace GameEngine
 
     public class Board
     {
-        public const int Width = 8;
+        public const int DefaultWidth = 8;
 
-        public const int Height = 8;
+        public const int DefaultHeight = 8;
 
         private static readonly ItemType[] ItemTypes =
         {
@@ -77,8 +104,19 @@ namespace GameEngine
         public Item[,] Items { get; }
 
         public Board()
+            : this(DefaultWidth, DefaultHeight)
         {
-            Items = new Item[Width, Height];
+            //
+        }
+
+        public Board(int width, int height)
+            : this(new Item[width, height])
+        {
+        }
+
+        public Board(Item[,] items)
+        {
+            Items = items;
             _rnd = new Random();
         }
 
@@ -128,7 +166,15 @@ namespace GameEngine
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    sb.Append(Items[x, y].Dump()).Append(" ");
+                    Item item = Items[x, y];
+                    if (item != null)
+                    {
+                        sb.Append(item.Dump()).Append(" ");
+                    }
+                    else
+                    {
+                        sb.Append("   ").Append(" ");
+                    }
                 }
 
                 sb.Append(Environment.NewLine);
@@ -144,9 +190,84 @@ namespace GameEngine
             Items[dest.X, dest.Y] = temp;
         }
 
-        public bool HasMatch3
+        public List<Point> TestMatch3H(int x, int y)
         {
-            get { return false; }
+            ItemType type00 = Items[x, y]?.ItemType;
+            ItemType type10 = Items[x + 1, y]?.ItemType;
+            ItemType type20 = Items[x + 2, y]?.ItemType;
+
+            var matches = new List<Point>();
+            if (ItemType.AreEquals(type00, type10, type20))
+            {
+                matches.AddRange(new[]
+                {
+                    new Point(x, y),
+                    new Point(x + 1, y),
+                    new Point(x + 2, y),
+                });
+            }
+
+            return matches;
+        }
+
+        public List<Point> TestMatch3V(int x, int y)
+        {
+            ItemType type00 = Items[x, y]?.ItemType;
+            ItemType type01 = Items[x, y + 1]?.ItemType;
+            ItemType type02 = Items[x, y + 2]?.ItemType;
+
+            var matches = new List<Point>();
+            if (ItemType.AreEquals(type00, type01, type02))
+            {
+                matches.AddRange(new[]
+                {
+                    new Point(x, y),
+                    new Point(x, y + 1),
+                    new Point(x, y + 2),
+                });
+            }
+
+            return matches;
+        }
+
+        public HashSet<Point> CalcMatches()
+        {
+            var matches = new HashSet<Point>();
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (x < Width - 2)
+                    {
+                        List<Point> match3 = TestMatch3H(x, y);
+                        if (match3.Count > 0)
+                        {
+                            match3.ForEach(p => matches.Add(p));
+                        }
+                    }
+                    if (y < Height - 2)
+                    {
+                        List<Point> match3 = TestMatch3V(x, y);
+                        if (match3.Count > 0)
+                        {
+                            match3.ForEach(p => matches.Add(p));
+                        }
+                    }                    
+                }
+            }
+
+            return matches;
+        }
+
+        public int Width
+        {
+            get { return Items.GetLength(0); }
+        }
+
+        public int Height
+        {
+            get { return Items.GetLength(1); }
         }
     }
 
@@ -172,6 +293,16 @@ namespace GameEngine
 
         public Item[,] Items => _board.Items;
 
+        public int BoardWidth
+        {
+            get { return _board.Width; }
+        }
+
+        public int BoardHeight
+        {
+            get { return _board.Height; }
+        }
+
         public void Reset()
         {
             Scores = 0;
@@ -190,50 +321,64 @@ namespace GameEngine
                    + _board.Dump();
         }
 
-        public static bool CanSwap(Point src, Point dest)
+        public bool CanSwap(Point src, Point dest)
         {
             return CanSwap(src.X, src.Y, dest.X, dest.Y);
         }
-        
-        public static bool CanSwap(int srcX, int srcY, int destX, int destY)
+
+        public bool CanSwap(int srcX, int srcY, int destX, int destY)
         {
             // Can swap horizontal/vertical neighbours only
-            return (0 <= srcX && srcX < Board.Width)
-                   && (0 <= destX && destX < Board.Width)
-                   && (0 <= srcY && destY < Board.Height)
-                   && (0 <= destY && destY < Board.Height)
+            return (0 <= srcX && srcX < _board.Width)
+                   && (0 <= destX && destX < _board.Width)
+                   && (0 <= srcY && destY < _board.Height)
+                   && (0 <= destY && destY < _board.Height)
                    && ((Math.Abs(srcX - destX) == 1 && srcY == destY)
                        || (Math.Abs(srcY - destY) == 1 && srcX == destX));
         }
 
+        // ReSharper disable once ReturnTypeCanBeEnumerable.Global
         public IAction[] Swap(Point src, Point dest)
         {
-            var actions = new List<IAction>();
-            
-            actions.Add(new SwapAction()
+            var actions = new List<IAction>
             {
-                SrcPos = src,
-                SrcItem = Items[src.X, src.Y],
-                DestPos = dest,
-                DestItem = Items[dest.X, dest.Y],
-            });
-            
-            _board.Swap(src, dest);
-
-            if (!_board.HasMatch3)
-            {
-                // Swap back 
-                _board.Swap(src, dest);
-                
-                actions.Add(new SwapAction()
+                new SwapAction
                 {
                     SrcPos = src,
                     SrcItem = Items[src.X, src.Y],
                     DestPos = dest,
                     DestItem = Items[dest.X, dest.Y],
-                });                
+                }
+            };
+
+            _board.Swap(src, dest);
+
+            HashSet<Point> matches = _board.CalcMatches();
+
+            if (matches.Count == 0)
+            {
+                _board.Swap(src, dest); // swap back
+
+                actions.Add(new SwapAction
+                {
+                    SrcPos = src,
+                    SrcItem = Items[src.X, src.Y],
+                    DestPos = dest,
+                    DestItem = Items[dest.X, dest.Y],
+                });
             }
-  
+            else
+            {
+                actions.Add(new DestroyAction
+                {
+                    Positions = matches.ToArray()
+                });
+                foreach (Point m in matches)
+                {
+                    Items[m.X, m.Y] = null;
+                }
+            }
+
             return actions.ToArray();
         }
     }

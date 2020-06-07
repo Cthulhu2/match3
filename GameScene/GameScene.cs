@@ -19,6 +19,7 @@ public class GameScene : Node2D
 
     private ItemHMovTween _itemHMovTween;
     private ItemVMovTween _itemVMovTween;
+    private ItemDestroyTween _itemDestroyTween;
 
     private Label _lblScores;
     private Label _lblTime;
@@ -26,6 +27,7 @@ public class GameScene : Node2D
     private Sprite[,] _itemSprites;
 
     private Queue<IAction> _actions;
+    private IAction _curAction;
     private bool _inProcess;
 
     // Called when the node enters the scene tree for the first time.
@@ -33,7 +35,7 @@ public class GameScene : Node2D
     {
         _game = new Game(new Board());
         _game.Reset();
-        _itemSprites = new Sprite[Board.Width, Board.Height];
+        _itemSprites = new Sprite[_game.BoardWidth, _game.BoardHeight];
         _actions = new Queue<IAction>();
 
         _lblScores = GetNode<Label>(new NodePath("Canvas/LblScores"));
@@ -42,6 +44,9 @@ public class GameScene : Node2D
         _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
         _itemHMovTween = GetNode<ItemHMovTween>(new NodePath("ItemHMovTween"));
         _itemVMovTween = GetNode<ItemVMovTween>(new NodePath("ItemVMovTween"));
+        _itemDestroyTween =
+            GetNode<ItemDestroyTween>(new NodePath("ItemDestroyTween"));
+        
 
         _timer = GetNode<Timer>(new NodePath("Timer"));
         _timer.WaitTime = 1; // sec
@@ -71,7 +76,7 @@ public class GameScene : Node2D
             return;
         }
 
-        if (Game.CanSwap(_selSpritePoint, new Point(x, y)))
+        if (_game.CanSwap(_selSpritePoint, new Point(x, y)))
         {
             Swap(x, y);
         }
@@ -103,10 +108,10 @@ public class GameScene : Node2D
             _actions.Enqueue(action);
         }
 
-        ProcessAction();
+        ProcessNextAction();
     }
 
-    private void ProcessAction()
+    private void ProcessNextAction()
     {
         _inProcess = true;
         if (_actions.Count > 0)
@@ -116,37 +121,75 @@ public class GameScene : Node2D
         else
         {
             _inProcess = false;
+            _curAction = null;
         }
+    }
+
+    public void OnDestroyActionEnd()
+    {
+        _itemDestroyTween.RemoveAll();
+        if (!(_curAction is DestroyAction dAct))
+        {
+            GD.PrintErr($"OnDestroyActionEnd. Unknown action: {_curAction}");
+            ProcessNextAction();
+            return;
+        }
+        foreach (Point dPos in dAct.Positions)
+        {
+            Sprite sprite = _itemSprites[dPos.X, dPos.Y];
+            _itemSprites[dPos.X, dPos.Y] = null;
+            _itemTable.RemoveChild(sprite);
+            GD.Print($"OnDestroyActionEnd. Remove: {dPos}");
+        }
+        GD.Print("OnDestroyActionEnd. Dump:");
+        foreach (string l in _game.Dump().Split(System.Environment.NewLine))
+        {
+            GD.Print(l);
+        }
+        ProcessNextAction();
     }
 
     private void ProcessAction(IAction action)
     {
-        if (action is SwapAction act)
+        _curAction = action;
+        // ReSharper disable once ConvertIfStatementToSwitchStatement
+        if (action is SwapAction swAct)
         {
-            bool isHorizontal = (act.SrcPos.Y == act.DestPos.Y);
-            Sprite srcSprite = _itemSprites[act.SrcPos.X, act.SrcPos.Y];
-            Sprite destSprite = _itemSprites[act.DestPos.X, act.DestPos.Y];
+            bool isHorizontal = (swAct.SrcPos.Y == swAct.DestPos.Y);
+            Sprite srcSprite = _itemSprites[swAct.SrcPos.X, swAct.SrcPos.Y];
+            Sprite destSprite = _itemSprites[swAct.DestPos.X, swAct.DestPos.Y];
             if (isHorizontal)
             {
+                _itemHMovTween.RemoveAll();
                 _itemHMovTween.Tween(srcSprite, destSprite.Position);
                 _itemHMovTween.Tween(destSprite, srcSprite.Position);
+                _itemHMovTween.InterpolateCallback(this, "ProcessNextAction");
                 _itemHMovTween.Start();
-                _itemHMovTween.InterpolateCallback(this, "ProcessAction");
             }
             else
             {
+                _itemVMovTween.RemoveAll();
                 _itemVMovTween.Tween(srcSprite, destSprite.Position);
                 _itemVMovTween.Tween(destSprite, srcSprite.Position);
+                _itemVMovTween.InterpolateCallback(this, "ProcessNextAction");
                 _itemVMovTween.Start();
-                _itemVMovTween.InterpolateCallback(this, "ProcessAction");
             }
 
-            _itemSprites[act.DestPos.X, act.DestPos.Y] = srcSprite;
-            _itemSprites[act.SrcPos.X, act.SrcPos.Y] = destSprite;
+            _itemSprites[swAct.DestPos.X, swAct.DestPos.Y] = srcSprite;
+            _itemSprites[swAct.SrcPos.X, swAct.SrcPos.Y] = destSprite;
+        }
+        else if (action is DestroyAction dAct)
+        {
+            foreach (Point dPos in dAct.Positions)
+            {
+                _itemDestroyTween.Tween(_itemSprites[dPos.X, dPos.Y]);
+            }
+            _itemDestroyTween.InterpolateCallback(this, "OnDestroyActionEnd");
+            _itemDestroyTween.Start();
         }
         else
         {
-            ProcessAction();
+            ProcessNextAction();
         }
     }
 
@@ -164,12 +207,12 @@ public class GameScene : Node2D
             return;
         }
 
-        for (int y = 0; y < Board.Height; y++)
+        for (int y = 0; y < _game.BoardHeight; y++)
         {
-            for (int x = 0; x < Board.Width; x++)
+            for (int x = 0; x < _game.BoardWidth; x++)
             {
                 Sprite s = _itemSprites[x, y];
-                if (s.GetRect().HasPoint(s.ToLocal(mEvt.Position)))
+                if (s != null && s.GetRect().HasPoint(s.ToLocal(mEvt.Position)))
                 {
                     OnSpriteClicked(x, y);
                 }
@@ -235,9 +278,9 @@ public class GameScene : Node2D
 
     private void GenSprites()
     {
-        for (int y = 0; y < Board.Height; y++)
+        for (int y = 0; y < _game.BoardHeight; y++)
         {
-            for (int x = 0; x < Board.Width; x++)
+            for (int x = 0; x < _game.BoardWidth; x++)
             {
                 Sprite itemSprite = GenSprite(_game.Items[x, y]);
                 itemSprite.Scale = new Vector2(5, 5);

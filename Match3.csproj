@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="GameOver\GameOver.cs" />
     <Compile Include="GameScene\GameScene.cs" />
+    <Compile Include="GameScene\ItemDestroyTween.cs" />
     <Compile Include="GameScene\ItemHMovTween.cs" />
     <Compile Include="GameScene\ItemSelTween.cs" />
     <Compile Include="GameScene\ItemVMovTween.cs" />
