@@ -290,25 +290,25 @@ public class GameScene : Node2D
     private static Sprite GenSprite(Item item)
     {
         string textureName;
-        switch (item.ItemType.Shape)
+        switch (item.Shape)
         {
-            case ItemShape.Circle when item.ItemType.Color == 1:
+            case ItemShape.Circle when item.Color == 1:
                 textureName = "Ball_Green.png";
                 break;
-            case ItemShape.Circle when item.ItemType.Color == 2:
+            case ItemShape.Circle when item.Color == 2:
                 textureName = "Ball_Blue.png";
                 break;
-            case ItemShape.Circle when item.ItemType.Color == 3:
+            case ItemShape.Circle when item.Color == 3:
                 textureName = "Ball_Grey.png";
                 break;
-            case ItemShape.Rect when item.ItemType.Color == 1:
+            case ItemShape.Rect when item.Color == 1:
                 textureName = "Cube_Green.png";
                 break;
-            case ItemShape.Rect when item.ItemType.Color == 2:
+            case ItemShape.Rect when item.Color == 2:
                 textureName = "Cube_Blue.png";
                 break;
             default:
-                textureName = "NoTextureFor" + item.ItemType;
+                textureName = "NoTextureFor" + item;
                 break;
         }
 
