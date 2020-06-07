@@ -47,32 +47,6 @@ namespace GameEngine
         }
 
         [Test]
-        public void RemoveAt()
-        {
-            var board = new Board();
-            board.Reset();
-            var p = new Point(3, 4);
-            //
-            Item it = board.RemoveAt(p);
-            //
-            Assert.NotNull(it);
-            for (int y = 0; y < board.Height; y++)
-            {
-                for (int x = 0; x < board.Width; x++)
-                {
-                    if (x == p.X && y == p.Y)
-                    {
-                        Assert.Null(board.Items[x, y]);
-                    }
-                    else
-                    {
-                        Assert.NotNull(board.Items[x, y]);
-                    }
-                }
-            }
-        }
-
-        [Test]
         public void GameOver()
         {
             var game = new Game(new Board());

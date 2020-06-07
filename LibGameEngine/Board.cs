@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
+// ReSharper disable ArrangeAccessorOwnerBody
+
 namespace GameEngine
 {
     public class Board
     {
-        public const int DefaultWidth = 8;
+        private const int DefaultWidth = 8;
 
-        public const int DefaultHeight = 8;
+        private const int DefaultHeight = 8;
 
         private static readonly Item[] ItemTemplates =
         {
@@ -30,7 +32,7 @@ namespace GameEngine
             //
         }
 
-        public Board(int width, int height)
+        private Board(int width, int height)
             : this(new Item[width, height])
         {
         }
@@ -69,15 +71,6 @@ namespace GameEngine
             Items[p.X, 0] = CreateRandomItem();
         }
 
-        public Item RemoveAt(Point p)
-        {
-            Item item = Items[p.X, p.Y];
-
-            Items[p.X, p.Y] = null;
-
-            return item;
-        }
-
         public string Dump()
         {
             var sb = new StringBuilder();
@@ -110,7 +103,7 @@ namespace GameEngine
             Items[dest.X, dest.Y] = temp;
         }
 
-        public List<Point> TestMatch3H(int x, int y)
+        private List<Point> TestMatch3H(int x, int y)
         {
             Item type00 = Items[x, y];
             Item type10 = Items[x + 1, y];
@@ -130,7 +123,7 @@ namespace GameEngine
             return matches;
         }
 
-        public List<Point> TestMatch3V(int x, int y)
+        private List<Point> TestMatch3V(int x, int y)
         {
             Item type00 = Items[x, y];
             Item type01 = Items[x, y + 1];

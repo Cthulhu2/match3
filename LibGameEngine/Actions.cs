@@ -31,14 +31,14 @@ namespace GameEngine
             DestPos = dest;
         }
         
-        protected bool Equals(FallDownPos other)
+        private bool Equals(FallDownPos other)
         {
             return SrcPos.Equals(other.SrcPos) && DestPos.Equals(other.DestPos);
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(null, obj)){ return false;}
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
             return Equals((FallDownPos) obj);
