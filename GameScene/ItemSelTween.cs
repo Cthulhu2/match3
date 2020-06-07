@@ -20,6 +20,18 @@ public class ItemSelTween : Tween
 //      
 //  }
 
+    public void TerminateAll()
+    {
+        RemoveAll();
+
+        if (_sprite != null)
+        {
+            _sprite.Position = _oldPos;
+            _sprite.Scale = _oldScale;
+            _sprite = null;
+        }
+    }
+    
     public void Tween(Sprite sprite)
     {
         if (_sprite == sprite)
@@ -27,13 +39,7 @@ public class ItemSelTween : Tween
             return;
         }
 
-        RemoveAll();
-
-        if (_sprite != null)
-        {
-            _sprite.Position = _oldPos;
-            _sprite.Scale = _oldScale;
-        }
+        TerminateAll();
 
         _sprite = sprite;
         _oldPos = sprite.Position;

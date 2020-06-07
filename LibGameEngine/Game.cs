@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
@@ -13,6 +14,20 @@ namespace GameEngine
         Rect
     }
 
+    public interface IAction
+    {
+
+    }
+
+    public class SwapAction : IAction
+    {
+        public Point SrcPos { get; set; }
+        public Item SrcItem { get; set; }
+        
+        public Point DestPos { get; set; }
+        public Item DestItem { get; set; }
+    }
+    
     public class ItemType
     {
         public int Color { get; internal set; }
@@ -121,6 +136,18 @@ namespace GameEngine
 
             return sb.ToString();
         }
+
+        public void Swap(Point src, Point dest)
+        {
+            Item temp = Items[src.X, src.Y];
+            Items[src.X, src.Y] = Items[dest.X, dest.Y];
+            Items[dest.X, dest.Y] = temp;
+        }
+
+        public bool HasMatch3
+        {
+            get { return false; }
+        }
     }
 
     public class Game
@@ -156,15 +183,58 @@ namespace GameEngine
             _timeLeftSec--;
         }
 
-        public void NextTurn()
-        {
-        }
-
         public string Dump()
         {
             return "Score: " + Scores + Environment.NewLine
                    + "Board: " + Environment.NewLine
                    + _board.Dump();
+        }
+
+        public static bool CanSwap(Point src, Point dest)
+        {
+            return CanSwap(src.X, src.Y, dest.X, dest.Y);
+        }
+        
+        public static bool CanSwap(int srcX, int srcY, int destX, int destY)
+        {
+            // Can swap horizontal/vertical neighbours only
+            return (0 <= srcX && srcX < Board.Width)
+                   && (0 <= destX && destX < Board.Width)
+                   && (0 <= srcY && destY < Board.Height)
+                   && (0 <= destY && destY < Board.Height)
+                   && ((Math.Abs(srcX - destX) == 1 && srcY == destY)
+                       || (Math.Abs(srcY - destY) == 1 && srcX == destX));
+        }
+
+        public IAction[] Swap(Point src, Point dest)
+        {
+            var actions = new List<IAction>();
+            
+            actions.Add(new SwapAction()
+            {
+                SrcPos = src,
+                SrcItem = Items[src.X, src.Y],
+                DestPos = dest,
+                DestItem = Items[dest.X, dest.Y],
+            });
+            
+            _board.Swap(src, dest);
+
+            if (!_board.HasMatch3)
+            {
+                // Swap back 
+                _board.Swap(src, dest);
+                
+                actions.Add(new SwapAction()
+                {
+                    SrcPos = src,
+                    SrcItem = Items[src.X, src.Y],
+                    DestPos = dest,
+                    DestItem = Items[dest.X, dest.Y],
+                });                
+            }
+  
+            return actions.ToArray();
         }
     }
 }

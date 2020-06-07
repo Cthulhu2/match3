@@ -87,5 +87,18 @@ namespace GameEngine
 
             Assert.True(game.IsGameOver);
         }
+        
+        [Test]
+        public void CanSwap()
+        {
+            Assert.False(Game.CanSwap(-1, 0, 0, 0));
+            Assert.False(Game.CanSwap(8, 0, 7, 0));
+            
+            Assert.False(Game.CanSwap(0, 0, 1, 1));
+            Assert.False(Game.CanSwap(0, 0, 1, 1));
+            
+            Assert.True(Game.CanSwap(0, 0, 0, 1));
+            Assert.True(Game.CanSwap(0, 0, 1, 0));
+        }
     }
 }
