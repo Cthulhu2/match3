@@ -150,6 +150,7 @@ public class GameScene : Node2D
         // {
         //     GD.Print(l);
         // }
+        UpdLblScores();
         ProcessNextAction();
     }
 

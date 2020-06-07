@@ -102,6 +102,11 @@ namespace GameEngine
     {
         public ItemType ItemType { get; set; }
 
+        public int Score
+        {
+            get { return 20; }
+        }
+
         public Item()
         {
             //
@@ -453,6 +458,8 @@ namespace GameEngine
                 });
                 foreach (Point m in matches)
                 {
+                    Item item = Items[m.X, m.Y];
+                    Scores += item.Score;
                     Items[m.X, m.Y] = null;
                 }
 
