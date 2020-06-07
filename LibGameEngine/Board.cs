@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
+// ReSharper disable InvertIf
 // ReSharper disable ArrangeAccessorOwnerBody
 
 namespace GameEngine
@@ -56,9 +57,29 @@ namespace GameEngine
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    Items[x, y] = CreateRandomItem();
+                    Items[x, y] = null;
                 }
             }
+
+            SpawnItems();
+        }
+
+        public List<Point> SpawnItems()
+        {
+            var points = new List<Point>();
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (Items[x, y] == null)
+                    {
+                        Items[x, y] = CreateRandomItem();
+                        points.Add(new Point(x, y));
+                    }
+                }
+            }
+
+            return points;
         }
 
         public void ColFallOneDown(Point p)
@@ -143,7 +164,7 @@ namespace GameEngine
             return matches;
         }
 
-        public HashSet<Point> CalcMatches()
+        public IEnumerable<Point> CalcMatches()
         {
             var matches = new HashSet<Point>();
 

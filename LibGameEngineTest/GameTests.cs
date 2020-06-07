@@ -213,7 +213,7 @@ namespace GameEngine
         }
 
         [Test]
-        public void FallDown()
+        public void FallDownAction()
         {
             var items = new Item[4, 2];
 
@@ -245,6 +245,43 @@ namespace GameEngine
             foreach (FallDownPos fPos in fallAct.Positions)
             {
                 Assert.True(expectFallPos.Contains(fPos));
+            }
+        }
+        
+        [Test]
+        public void SpawnAction()
+        {
+            var items = new Item[4, 2];
+
+            items[0, 0] = new Item(9, ItemShape.Rect);
+            items[1, 0] = new Item(10, ItemShape.Rect);
+            items[2, 0] = new Item(11, ItemShape.Rect);
+            items[3, 0] = new Item(12, ItemShape.Rect);
+
+            items[0, 1] = new Item(1, ItemShape.Circle);
+            items[1, 1] = new Item(1, ItemShape.Circle);
+            items[2, 1] = new Item(2, ItemShape.Circle); //
+            items[3, 1] = new Item(1, ItemShape.Circle);
+
+            var game = new Game(new Board(items));
+            //
+            IAction[] actions = game.Swap(new Point(2, 1), new Point(3, 1));
+            //
+            Assert.IsInstanceOf(typeof(SwapAction), actions[0]);
+            Assert.IsInstanceOf(typeof(DestroyAction), actions[1]);
+            Assert.IsInstanceOf(typeof(FallDownAction), actions[2]);
+            Assert.IsInstanceOf(typeof(SpawnAction), actions[3]);
+            var spawnAct = (SpawnAction) actions[3];
+            var expectSpawnPos = new List<Point>
+            {
+                new Point(0, 0),
+                new Point(1, 0),
+                new Point(2, 0),
+            };
+            Assert.AreEqual(expectSpawnPos.Count, spawnAct.Positions.Length);
+            foreach (Point spPos in spawnAct.Positions)
+            {
+                Assert.True(expectSpawnPos.Contains(spPos));
             }
         }
     }

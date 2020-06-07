@@ -95,9 +95,9 @@ namespace GameEngine
 
             _board.Swap(src, dest);
 
-            HashSet<Point> matches = _board.CalcMatches();
+            Point[] matches = _board.CalcMatches().ToArray();
 
-            if (matches.Count == 0)
+            if (matches.Length == 0)
             {
                 _board.Swap(src, dest); // swap back
 
@@ -111,10 +111,7 @@ namespace GameEngine
             }
             else
             {
-                actions.Add(new DestroyAction
-                {
-                    Positions = matches.ToArray()
-                });
+                actions.Add(new DestroyAction {Positions = matches});
                 foreach (Point m in matches)
                 {
                     Item item = Items[m.X, m.Y];
@@ -122,14 +119,11 @@ namespace GameEngine
                     Items[m.X, m.Y] = null;
                 }
 
-                List<FallDownPos> fallDown = _board.CalcFallDownPositions();
-                if (fallDown.Count > 0)
-                {
-                    actions.Add(new FallDownAction
-                    {
-                        Positions = fallDown.ToArray()
-                    });
-                }
+                FallDownPos[] fallen = _board.CalcFallDownPositions().ToArray();
+                actions.Add(new FallDownAction {Positions = fallen});
+
+                Point[] spawned = _board.SpawnItems().ToArray();
+                actions.Add(new SpawnAction {Positions = spawned});
             }
 
             return actions.ToArray();

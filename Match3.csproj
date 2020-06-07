@@ -60,6 +60,7 @@
     <Compile Include="GameScene\ItemFallTween.cs" />
     <Compile Include="GameScene\ItemHMovTween.cs" />
     <Compile Include="GameScene\ItemSelTween.cs" />
+    <Compile Include="GameScene\ItemSpawnTween.cs" />
     <Compile Include="GameScene\ItemVMovTween.cs" />
     <Compile Include="MainMenu\MainMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

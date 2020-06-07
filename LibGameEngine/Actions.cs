@@ -57,4 +57,9 @@ namespace GameEngine
     {
         public FallDownPos[] Positions { get; set; }
     }
+
+    public class SpawnAction : IAction
+    {
+        public Point[] Positions { get; set; }
+    }
 }

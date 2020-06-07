@@ -21,6 +21,7 @@ public class GameScene : Node2D
     private ItemVMovTween _itemVMovTween;
     private ItemFallTween _itemFallTween;
     private ItemDestroyTween _itemDestroyTween;
+    private ItemSpawnTween _itemSpawnTween;
 
     private Label _lblScores;
     private Label _lblTime;
@@ -48,6 +49,8 @@ public class GameScene : Node2D
         _itemFallTween = GetNode<ItemFallTween>(new NodePath("ItemFallTween"));
         _itemDestroyTween =
             GetNode<ItemDestroyTween>(new NodePath("ItemDestroyTween"));
+        _itemSpawnTween =
+            GetNode<ItemSpawnTween>(new NodePath("ItemSpawnTween"));
 
 
         _timer = GetNode<Timer>(new NodePath("Timer"));
@@ -57,7 +60,7 @@ public class GameScene : Node2D
 
         UpdLblTime();
         UpdLblScores();
-        GenSprites();
+        SpawnSprites();
     }
 
 //  // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -164,18 +167,18 @@ public class GameScene : Node2D
             return;
         }
 
-        foreach (FallDownPos fPos in fAct.Positions)
-        {
-            Sprite sprite = _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y];
-            _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y] = null;
-            _itemSprites[fPos.DestPos.X, fPos.DestPos.Y] = sprite;
-        }
         GD.Print("OnFallDownActionEnd. Dump:");
         foreach (string l in _game.Dump().Split(System.Environment.NewLine))
         {
             GD.Print(l);
         }
         ProcessNextAction();
+    }
+    
+    public void OnSpawnActionEnd()
+    {
+        _itemSpawnTween.RemoveAll();
+        //ProcessNextAction();
     }
 
     private void ProcessAction(IAction action)
@@ -222,8 +225,27 @@ public class GameScene : Node2D
             foreach (FallDownPos fPos in fAct.Positions)
             {
                 Sprite sprite = _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y];
+                _itemSprites[fPos.SrcPos.X, fPos.SrcPos.Y] = null;
+                _itemSprites[fPos.DestPos.X, fPos.DestPos.Y] = sprite;
                 Vector2 toPos = ToItemTablePos(fPos.DestPos.X, fPos.DestPos.Y);
                 _itemFallTween.Tween(sprite, toPos);
+            }
+
+            if (_actions.Peek() is SpawnAction)
+            {
+                // Do Spawn and FallDown in parallel
+                var spAct = (SpawnAction) _actions.Dequeue();
+
+                foreach (Point spPos in spAct.Positions)
+                {
+                    Sprite sprite = SpawnSprite(spPos.X, spPos.Y);
+                    sprite.Scale = new Vector2(5, 0);
+                    sprite.Visible = true;
+                    _itemSpawnTween.Tween(sprite);
+                }
+
+                _itemSpawnTween.InterpolateCallback(this, "OnSpawnActionEnd");
+                _itemSpawnTween.Start();
             }
 
             _itemFallTween.InterpolateCallback(this, "OnFallDownActionEnd");
@@ -318,20 +340,29 @@ public class GameScene : Node2D
         };
     }
 
-    private void GenSprites()
+    private void SpawnSprites()
     {
         for (int y = 0; y < _game.BoardHeight; y++)
         {
             for (int x = 0; x < _game.BoardWidth; x++)
             {
-                Sprite itemSprite = GenSprite(_game.Items[x, y]);
-                itemSprite.Scale = new Vector2(5, 5);
-                itemSprite.Visible = true;
-                itemSprite.Position = ToItemTablePos(x, y);
-                _itemSprites[x, y] = itemSprite;
-                _itemTable.AddChild(itemSprite);
+                SpawnSprite(x, y)
+                    .Visible = true;
             }
         }
+    }
+
+    private Sprite SpawnSprite(int x, int y)
+    {
+        Sprite sprite = GenSprite(_game.Items[x, y]);
+        
+        sprite.Scale = new Vector2(5, 5);
+        sprite.Position = ToItemTablePos(x, y);
+        
+        _itemSprites[x, y] = sprite;
+        _itemTable.AddChild(sprite);
+
+        return sprite;
     }
 
     private static Vector2 ToItemTablePos(int x, int y)
