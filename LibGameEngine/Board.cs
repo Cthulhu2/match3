@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 
 // ReSharper disable InvertIf
@@ -62,6 +63,20 @@ namespace GameEngine
             }
 
             SpawnItems();
+            // Remove all existed matches
+            List<Point> matches;
+            do
+            {
+                matches = CalcMatches().ToList();
+                foreach (Point m in matches)
+                {
+                    Items[m.X, m.Y] = null;
+                }
+
+                CalcFallDownPositions();
+                SpawnItems();
+                
+            } while (matches.Any());
         }
 
         public List<SpawnPos> SpawnItems()
