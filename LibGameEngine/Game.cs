@@ -19,7 +19,7 @@ namespace GameEngine
 
         public int Scores { get; private set; }
 
-        public bool IsGameOver
+        public bool IsOver
         {
             get { return TimeLeftSec < 0; }
         }

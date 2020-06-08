@@ -5,8 +5,6 @@ using Godot;
 
 public class ItemDestroyTween : Tween
 {
-    private const float DurationSec = 0.25f;
-
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
@@ -17,11 +15,6 @@ public class ItemDestroyTween : Tween
 //  {
 //      
 //  }
-
-    public bool InterpolateCallback(Object obj, string callback)
-    {
-        return this.InterpolateCallback(obj, DurationSec, callback);
-    }
 
     public void Tween(Sprite sprite)
     {

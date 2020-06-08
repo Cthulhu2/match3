@@ -5,8 +5,6 @@ using Godot;
 
 public class ItemVMovTween : Tween
 {
-    private const float DurationSec = 0.5f;
-
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
@@ -17,11 +15,6 @@ public class ItemVMovTween : Tween
 //  {
 //      
 //  }
-
-    public bool InterpolateCallback(Object obj, string callback)
-    {
-        return this.InterpolateCallback(obj, DurationSec, callback);
-    }
 
     public void Tween(Sprite sprite, Vector2 targetPos)
     {

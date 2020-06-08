@@ -55,6 +55,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameOver\GameOver.cs" />
+    <Compile Include="GameScene\Actions\DestroyAct.cs" />
+    <Compile Include="GameScene\Actions\FallDownAct.cs" />
+    <Compile Include="GameScene\Actions\SpawnAct.cs" />
+    <Compile Include="GameScene\Actions\SwapAct.cs" />
     <Compile Include="GameScene\GameScene.cs" />
     <Compile Include="GameScene\ItemDestroyTween.cs" />
     <Compile Include="GameScene\ItemFallTween.cs" />

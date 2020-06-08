@@ -66,11 +66,11 @@ namespace GameEngine
                 game.Tick();
             }
 
-            Assert.False(game.IsGameOver);
+            Assert.False(game.IsOver);
 
             game.Tick();
 
-            Assert.True(game.IsGameOver);
+            Assert.True(game.IsOver);
         }
 
         [Test]
