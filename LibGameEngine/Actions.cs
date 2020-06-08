@@ -58,8 +58,20 @@ namespace GameEngine
         public FallDownPos[] Positions { get; set; }
     }
 
+    public class SpawnPos
+    {
+        public Point Pos { get; }
+        public Item Item { get; }
+
+        public SpawnPos(Point pos, Item item)
+        {
+            Pos = pos;
+            Item = item;
+        }
+    }
+    
     public class SpawnAction : IAction
     {
-        public Point[] Positions { get; set; }
+        public SpawnPos[] Positions { get; set; }
     }
 }

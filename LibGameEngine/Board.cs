@@ -64,22 +64,23 @@ namespace GameEngine
             SpawnItems();
         }
 
-        public List<Point> SpawnItems()
+        public List<SpawnPos> SpawnItems()
         {
-            var points = new List<Point>();
+            var spawnPos = new List<SpawnPos>();
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     if (Items[x, y] == null)
                     {
-                        Items[x, y] = CreateRandomItem();
-                        points.Add(new Point(x, y));
+                        Item item = CreateRandomItem();
+                        Items[x, y] = item;
+                        spawnPos.Add(new SpawnPos(new Point(x, y), item));
                     }
                 }
             }
 
-            return points;
+            return spawnPos;
         }
 
         public void ColFallOneDown(Point p)

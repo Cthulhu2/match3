@@ -111,19 +111,25 @@ namespace GameEngine
             }
             else
             {
-                actions.Add(new DestroyAction {Positions = matches});
-                foreach (Point m in matches)
+                while (matches.Length > 0)
                 {
-                    Item item = Items[m.X, m.Y];
-                    Scores += item.Score;
-                    Items[m.X, m.Y] = null;
+                    actions.Add(new DestroyAction {Positions = matches});
+                    foreach (Point m in matches)
+                    {
+                        Item item = Items[m.X, m.Y];
+                        Scores += item.Score;
+                        Items[m.X, m.Y] = null;
+                    }
+
+                    FallDownPos[] fallen = _board.CalcFallDownPositions()
+                        .ToArray();
+                    actions.Add(new FallDownAction {Positions = fallen});
+
+                    SpawnPos[] spawned = _board.SpawnItems().ToArray();
+                    actions.Add(new SpawnAction {Positions = spawned});
+                    
+                    matches = _board.CalcMatches().ToArray();
                 }
-
-                FallDownPos[] fallen = _board.CalcFallDownPositions().ToArray();
-                actions.Add(new FallDownAction {Positions = fallen});
-
-                Point[] spawned = _board.SpawnItems().ToArray();
-                actions.Add(new SpawnAction {Positions = spawned});
             }
 
             return actions.ToArray();

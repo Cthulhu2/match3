@@ -279,9 +279,9 @@ namespace GameEngine
                 new Point(2, 0),
             };
             Assert.AreEqual(expectSpawnPos.Count, spawnAct.Positions.Length);
-            foreach (Point spPos in spawnAct.Positions)
+            foreach (SpawnPos spPos in spawnAct.Positions)
             {
-                Assert.True(expectSpawnPos.Contains(spPos));
+                Assert.True(expectSpawnPos.Contains(spPos.Pos));
             }
         }
     }

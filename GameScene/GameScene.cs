@@ -236,12 +236,13 @@ public class GameScene : Node2D
                 // Do Spawn and FallDown in parallel
                 var spAct = (SpawnAction) _actions.Dequeue();
 
-                foreach (Point spPos in spAct.Positions)
+                foreach (SpawnPos spPos in spAct.Positions)
                 {
-                    Sprite sprite = SpawnSprite(spPos.X, spPos.Y);
-                    sprite.Scale = new Vector2(5, 0);
-                    sprite.Visible = true;
-                    _itemSpawnTween.Tween(sprite);
+                    Sprite itemSprite =
+                        SpawnSprite(spPos.Pos.X, spPos.Pos.Y, spPos.Item);
+                    itemSprite.Scale = new Vector2(5, 0);
+                    itemSprite.Visible = true;
+                    _itemSpawnTween.Tween(itemSprite);
                 }
 
                 _itemSpawnTween.InterpolateCallback(this, "OnSpawnActionEnd");
@@ -346,15 +347,15 @@ public class GameScene : Node2D
         {
             for (int x = 0; x < _game.BoardWidth; x++)
             {
-                SpawnSprite(x, y)
+                SpawnSprite(x, y, _game.Items[x, y])
                     .Visible = true;
             }
         }
     }
 
-    private Sprite SpawnSprite(int x, int y)
+    private Sprite SpawnSprite(int x, int y, Item item)
     {
-        Sprite sprite = GenSprite(_game.Items[x, y]);
+        Sprite sprite = GenSprite(item);
         
         sprite.Scale = new Vector2(5, 5);
         sprite.Position = ToItemTablePos(x, y);
