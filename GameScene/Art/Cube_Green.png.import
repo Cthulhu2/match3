@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Ball_Grey.png-56f613ebbbd7ae6e669e979a41f399de.stex"
+path="res://.import/Cube_Green.png-c12ab28b37ab1fa83d546b2739c72e29.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://GameScene/Ball_Grey.png"
-dest_files=[ "res://.import/Ball_Grey.png-56f613ebbbd7ae6e669e979a41f399de.stex" ]
+source_file="res://GameScene/Art/Cube_Green.png"
+dest_files=[ "res://.import/Cube_Green.png-c12ab28b37ab1fa83d546b2739c72e29.stex" ]
 
 [params]
 

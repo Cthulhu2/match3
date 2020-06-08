@@ -82,31 +82,31 @@ namespace GameEngine
         public void Match3Horizontal()
         {
             var items = new Item[4, 4];
-            items[0, 0] = new Item(1, ItemShape.Circle);
-            items[1, 0] = new Item(2, ItemShape.Circle); //
-            items[2, 0] = new Item(1, ItemShape.Circle);
-            items[3, 0] = new Item(1, ItemShape.Circle);
+            items[0, 0] = new Item(1, ItemShape.Ball);
+            items[1, 0] = new Item(2, ItemShape.Ball); //
+            items[2, 0] = new Item(1, ItemShape.Ball);
+            items[3, 0] = new Item(1, ItemShape.Ball);
 
-            items[0, 1] = new Item(1, ItemShape.Rect);
-            items[1, 1] = new Item(2, ItemShape.Rect);
-            items[2, 1] = new Item(3, ItemShape.Rect);
-            items[3, 1] = new Item(4, ItemShape.Rect);
+            items[0, 1] = new Item(1, ItemShape.Cube);
+            items[1, 1] = new Item(2, ItemShape.Cube);
+            items[2, 1] = new Item(3, ItemShape.Cube);
+            items[3, 1] = new Item(4, ItemShape.Cube);
 
-            items[0, 2] = new Item(5, ItemShape.Rect);
-            items[1, 2] = new Item(6, ItemShape.Rect);
-            items[2, 2] = new Item(7, ItemShape.Rect);
-            items[3, 2] = new Item(8, ItemShape.Rect);
+            items[0, 2] = new Item(5, ItemShape.Cube);
+            items[1, 2] = new Item(6, ItemShape.Cube);
+            items[2, 2] = new Item(7, ItemShape.Cube);
+            items[3, 2] = new Item(8, ItemShape.Cube);
 
-            items[0, 3] = new Item(9, ItemShape.Rect);
-            items[1, 3] = new Item(10, ItemShape.Rect);
-            items[2, 3] = new Item(11, ItemShape.Rect);
-            items[3, 3] = new Item(12, ItemShape.Rect);
+            items[0, 3] = new Item(9, ItemShape.Cube);
+            items[1, 3] = new Item(10, ItemShape.Cube);
+            items[2, 3] = new Item(11, ItemShape.Cube);
+            items[3, 3] = new Item(12, ItemShape.Cube);
 
             var game = new Game(new Board(items));
             //
             IAction[] actions = game.Swap(new Point(0, 0), new Point(1, 0));
             //
-            Assert.AreEqual(2, actions.Length);
+            Assert.True(actions.Length >= 2);
             Assert.IsInstanceOf(typeof(SwapAction), actions[0]);
             Assert.IsInstanceOf(typeof(DestroyAction), actions[1]);
             var destroyAct = (DestroyAction) actions[1];
@@ -128,25 +128,25 @@ namespace GameEngine
         {
             var items = new Item[4, 4];
 
-            items[0, 0] = new Item(9, ItemShape.Rect);
-            items[1, 0] = new Item(10, ItemShape.Rect);
-            items[2, 0] = new Item(11, ItemShape.Rect);
-            items[3, 0] = new Item(12, ItemShape.Rect);
+            items[0, 0] = new Item(9, ItemShape.Cube);
+            items[1, 0] = new Item(10, ItemShape.Cube);
+            items[2, 0] = new Item(11, ItemShape.Cube);
+            items[3, 0] = new Item(12, ItemShape.Cube);
 
-            items[0, 1] = new Item(1, ItemShape.Rect);
-            items[1, 1] = new Item(2, ItemShape.Rect);
-            items[2, 1] = new Item(3, ItemShape.Rect);
-            items[3, 1] = new Item(4, ItemShape.Rect);
+            items[0, 1] = new Item(1, ItemShape.Cube);
+            items[1, 1] = new Item(2, ItemShape.Cube);
+            items[2, 1] = new Item(3, ItemShape.Cube);
+            items[3, 1] = new Item(4, ItemShape.Cube);
 
-            items[0, 2] = new Item(5, ItemShape.Rect);
-            items[1, 2] = new Item(6, ItemShape.Rect);
-            items[2, 2] = new Item(7, ItemShape.Rect);
-            items[3, 2] = new Item(8, ItemShape.Rect);
+            items[0, 2] = new Item(5, ItemShape.Cube);
+            items[1, 2] = new Item(6, ItemShape.Cube);
+            items[2, 2] = new Item(7, ItemShape.Cube);
+            items[3, 2] = new Item(8, ItemShape.Cube);
 
-            items[0, 3] = new Item(1, ItemShape.Circle);
-            items[1, 3] = new Item(2, ItemShape.Circle); //
-            items[2, 3] = new Item(1, ItemShape.Circle);
-            items[3, 3] = new Item(1, ItemShape.Circle);
+            items[0, 3] = new Item(1, ItemShape.Ball);
+            items[1, 3] = new Item(2, ItemShape.Ball); //
+            items[2, 3] = new Item(1, ItemShape.Ball);
+            items[3, 3] = new Item(1, ItemShape.Ball);
 
             var game = new Game(new Board(items));
             //
@@ -172,25 +172,25 @@ namespace GameEngine
         public void Match3Vertical()
         {
             var items = new Item[4, 4];
-            items[0, 0] = new Item(1, ItemShape.Circle);
-            items[1, 0] = new Item(10, ItemShape.Rect);
-            items[2, 0] = new Item(11, ItemShape.Rect);
-            items[3, 0] = new Item(12, ItemShape.Rect);
+            items[0, 0] = new Item(1, ItemShape.Ball);
+            items[1, 0] = new Item(10, ItemShape.Cube);
+            items[2, 0] = new Item(11, ItemShape.Cube);
+            items[3, 0] = new Item(12, ItemShape.Cube);
 
-            items[0, 1] = new Item(1, ItemShape.Circle);
-            items[1, 1] = new Item(13, ItemShape.Rect);
-            items[2, 1] = new Item(14, ItemShape.Rect);
-            items[3, 1] = new Item(15, ItemShape.Rect);
+            items[0, 1] = new Item(1, ItemShape.Ball);
+            items[1, 1] = new Item(13, ItemShape.Cube);
+            items[2, 1] = new Item(14, ItemShape.Cube);
+            items[3, 1] = new Item(15, ItemShape.Cube);
 
-            items[0, 2] = new Item(2, ItemShape.Circle); //
-            items[1, 2] = new Item(16, ItemShape.Rect);
-            items[2, 2] = new Item(17, ItemShape.Rect);
-            items[3, 2] = new Item(18, ItemShape.Rect);
+            items[0, 2] = new Item(2, ItemShape.Ball); //
+            items[1, 2] = new Item(16, ItemShape.Cube);
+            items[2, 2] = new Item(17, ItemShape.Cube);
+            items[3, 2] = new Item(18, ItemShape.Cube);
 
-            items[0, 3] = new Item(1, ItemShape.Circle);
-            items[1, 3] = new Item(19, ItemShape.Rect);
-            items[2, 3] = new Item(20, ItemShape.Rect);
-            items[3, 3] = new Item(21, ItemShape.Rect);
+            items[0, 3] = new Item(1, ItemShape.Ball);
+            items[1, 3] = new Item(19, ItemShape.Cube);
+            items[2, 3] = new Item(20, ItemShape.Cube);
+            items[3, 3] = new Item(21, ItemShape.Cube);
 
             var game = new Game(new Board(items));
             //
@@ -217,15 +217,15 @@ namespace GameEngine
         {
             var items = new Item[4, 2];
 
-            items[0, 0] = new Item(9, ItemShape.Rect);
-            items[1, 0] = new Item(10, ItemShape.Rect);
-            items[2, 0] = new Item(11, ItemShape.Rect);
-            items[3, 0] = new Item(12, ItemShape.Rect);
+            items[0, 0] = new Item(9, ItemShape.Cube);
+            items[1, 0] = new Item(10, ItemShape.Cube);
+            items[2, 0] = new Item(11, ItemShape.Cube);
+            items[3, 0] = new Item(12, ItemShape.Cube);
 
-            items[0, 1] = new Item(1, ItemShape.Circle);
-            items[1, 1] = new Item(1, ItemShape.Circle);
-            items[2, 1] = new Item(2, ItemShape.Circle); //
-            items[3, 1] = new Item(1, ItemShape.Circle);
+            items[0, 1] = new Item(1, ItemShape.Ball);
+            items[1, 1] = new Item(1, ItemShape.Ball);
+            items[2, 1] = new Item(2, ItemShape.Ball); //
+            items[3, 1] = new Item(1, ItemShape.Ball);
 
             var game = new Game(new Board(items));
             //
@@ -253,15 +253,15 @@ namespace GameEngine
         {
             var items = new Item[4, 2];
 
-            items[0, 0] = new Item(9, ItemShape.Rect);
-            items[1, 0] = new Item(10, ItemShape.Rect);
-            items[2, 0] = new Item(11, ItemShape.Rect);
-            items[3, 0] = new Item(12, ItemShape.Rect);
+            items[0, 0] = new Item(9, ItemShape.Cube);
+            items[1, 0] = new Item(10, ItemShape.Cube);
+            items[2, 0] = new Item(11, ItemShape.Cube);
+            items[3, 0] = new Item(12, ItemShape.Cube);
 
-            items[0, 1] = new Item(1, ItemShape.Circle);
-            items[1, 1] = new Item(1, ItemShape.Circle);
-            items[2, 1] = new Item(2, ItemShape.Circle); //
-            items[3, 1] = new Item(1, ItemShape.Circle);
+            items[0, 1] = new Item(1, ItemShape.Ball);
+            items[1, 1] = new Item(1, ItemShape.Ball);
+            items[2, 1] = new Item(2, ItemShape.Ball); //
+            items[3, 1] = new Item(1, ItemShape.Ball);
 
             var game = new Game(new Board(items));
             //

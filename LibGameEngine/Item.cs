@@ -2,8 +2,11 @@
 {
     public enum ItemShape
     {
-        Circle,
-        Rect
+        Ball,
+        Cube,
+        HLine,
+        VLine,
+        Bomb,
     }
 
     public class Item
@@ -23,9 +26,9 @@
         {
             switch (Shape)
             {
-                case ItemShape.Circle:
+                case ItemShape.Ball:
                     return "(" + Color + ")";
-                case ItemShape.Rect:
+                case ItemShape.Cube:
                     return "[" + Color + "]";
                 default:
                     return "nil";

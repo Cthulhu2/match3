@@ -77,8 +77,15 @@
     <Content Include="GameScene\Ball_Blue.png" />
     <Content Include="GameScene\Ball_Green.png" />
     <Content Include="GameScene\Ball_Grey.png" />
+    <Content Include="GameScene\Bomb_Blue.png" />
+    <Content Include="GameScene\Bomb_Green.png" />
+    <Content Include="GameScene\Bomb_Grey.png" />
     <Content Include="GameScene\Cube_Blue.png" />
     <Content Include="GameScene\Cube_Green.png" />
+    <Content Include="GameScene\Destroyer.png" />
+    <Content Include="GameScene\HLine_Blue.png" />
+    <Content Include="GameScene\HLine_Green.png" />
+    <Content Include="GameScene\HLine_Grey.png" />
     <Content Include="GameScene\ItemTable.png" />
   </ItemGroup>
   <ItemGroup>

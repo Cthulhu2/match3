@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Ball_Blue.png-90665160485af0d8c0db4966d0f3a310.stex"
+path="res://.import/HLine_Green.png-9ba8cdf15de407b9eb360271e3aee47b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://GameScene/Ball_Blue.png"
-dest_files=[ "res://.import/Ball_Blue.png-90665160485af0d8c0db4966d0f3a310.stex" ]
+source_file="res://GameScene/Art/HLine_Green.png"
+dest_files=[ "res://.import/HLine_Green.png-9ba8cdf15de407b9eb360271e3aee47b.stex" ]
 
 [params]
 

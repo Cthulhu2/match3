@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://GameScene/GameScene.cs" type="Script" id=1]
-[ext_resource path="res://GameScene/ItemTable.png" type="Texture" id=2]
+[ext_resource path="res://GameScene/Art/ItemTable.png" type="Texture" id=2]
 [ext_resource path="res://GameScene/ItemHMovTween.cs" type="Script" id=3]
 [ext_resource path="res://GameScene/ItemVMovTween.cs" type="Script" id=4]
 [ext_resource path="res://GameScene/ItemSelTween.cs" type="Script" id=5]

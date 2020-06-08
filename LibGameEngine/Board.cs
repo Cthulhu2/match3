@@ -17,11 +17,11 @@ namespace GameEngine
 
         private static readonly Item[] ItemTemplates =
         {
-            new Item(1, ItemShape.Circle),
-            new Item(2, ItemShape.Circle),
-            new Item(3, ItemShape.Circle),
-            new Item(1, ItemShape.Rect),
-            new Item(2, ItemShape.Rect),
+            new Item(1, ItemShape.Ball),
+            new Item(2, ItemShape.Ball),
+            new Item(3, ItemShape.Ball),
+            new Item(1, ItemShape.Cube),
+            new Item(2, ItemShape.Cube),
         };
 
         private readonly Random _rnd;

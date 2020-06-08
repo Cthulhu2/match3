@@ -160,7 +160,7 @@ public class GameScene : Node2D
     public void OnFallDownActionEnd()
     {
         _itemFallTween.TerminateAll();
-        if (!(_curAction is FallDownAction fAct))
+        if (!(_curAction is FallDownAction))
         {
             GD.PrintErr($"OnFallDownActionEnd. Unknown action: {_curAction}");
             ProcessNextAction();
@@ -172,9 +172,10 @@ public class GameScene : Node2D
         {
             GD.Print(l);
         }
+
         ProcessNextAction();
     }
-    
+
     public void OnSpawnActionEnd()
     {
         _itemSpawnTween.RemoveAll();
@@ -310,34 +311,33 @@ public class GameScene : Node2D
         UpdLblTime();
     }
 
+    private static readonly Dictionary<int, string> Colors =
+        new Dictionary<int, string>
+        {
+            {1, "Green"},
+            {2, "Blue"},
+            {3, "Grey"},
+        };
+
+    private static readonly Dictionary<ItemShape, string> Shapes =
+        new Dictionary<ItemShape, string>
+        {
+            {ItemShape.Ball, "Ball"},
+            {ItemShape.Cube, "Cube"},
+            {ItemShape.HLine, "HLine"},
+            {ItemShape.VLine, "HLine"}, // and rotate
+            {ItemShape.Bomb, "Bomb"},
+        };
+    
     private static Sprite GenSprite(Item item)
     {
-        string textureName;
-        switch (item.Shape)
-        {
-            case ItemShape.Circle when item.Color == 1:
-                textureName = "Ball_Green.png";
-                break;
-            case ItemShape.Circle when item.Color == 2:
-                textureName = "Ball_Blue.png";
-                break;
-            case ItemShape.Circle when item.Color == 3:
-                textureName = "Ball_Grey.png";
-                break;
-            case ItemShape.Rect when item.Color == 1:
-                textureName = "Cube_Green.png";
-                break;
-            case ItemShape.Rect when item.Color == 2:
-                textureName = "Cube_Blue.png";
-                break;
-            default:
-                textureName = "NoTextureFor" + item;
-                break;
-        }
+        string shape = Shapes[item.Shape];
+        string color = Colors[item.Color];
+        string texture = $"{shape}_{color}.png";
 
         return new Sprite
         {
-            Texture = GD.Load<Texture>("res://GameScene/" + textureName)
+            Texture = GD.Load<Texture>("res://GameScene/Art/" + texture)
         };
     }
 
@@ -356,10 +356,14 @@ public class GameScene : Node2D
     private Sprite SpawnSprite(int x, int y, Item item)
     {
         Sprite sprite = GenSprite(item);
-        
+        if (item.Shape == ItemShape.VLine)
+        {
+            sprite.Rotation = 90f;
+        }
+
         sprite.Scale = new Vector2(5, 5);
         sprite.Position = ToItemTablePos(x, y);
-        
+
         _itemSprites[x, y] = sprite;
         _itemTable.AddChild(sprite);
 

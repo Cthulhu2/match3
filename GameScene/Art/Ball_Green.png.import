@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/ItemTable.png-73b6e063bdd4d173837df98c46f3c782.stex"
+path="res://.import/Ball_Green.png-87345e4487fcd64b848252c6a7f80ea9.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://GameScene/ItemTable.png"
-dest_files=[ "res://.import/ItemTable.png-73b6e063bdd4d173837df98c46f3c782.stex" ]
+source_file="res://GameScene/Art/Ball_Green.png"
+dest_files=[ "res://.import/Ball_Green.png-87345e4487fcd64b848252c6a7f80ea9.stex" ]
 
 [params]
 

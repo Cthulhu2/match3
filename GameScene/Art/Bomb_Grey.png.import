@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Cube_Green.png-7b74d689164f71dc2756450259d47527.stex"
+path="res://.import/Bomb_Grey.png-ffd2049833926735e0f2f267c2c0d458.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://GameScene/Cube_Green.png"
-dest_files=[ "res://.import/Cube_Green.png-7b74d689164f71dc2756450259d47527.stex" ]
+source_file="res://GameScene/Art/Bomb_Grey.png"
+dest_files=[ "res://.import/Bomb_Grey.png-ffd2049833926735e0f2f267c2c0d458.stex" ]
 
 [params]
 
