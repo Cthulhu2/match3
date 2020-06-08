@@ -1,7 +1,10 @@
-﻿namespace GameEngine
+﻿// ReSharper disable ArrangeAccessorOwnerBody
+
+namespace GameEngine
 {
     public enum ItemShape
     {
+        None,
         Ball,
         Cube,
         HLine,
@@ -14,6 +17,21 @@
         public int Color { get; }
         public ItemShape Shape { get; }
         public int Score { get; }
+
+        public bool IsRegularShape
+        {
+            get { return Shape == ItemShape.Ball || Shape == ItemShape.Cube; }
+        }
+
+        public bool IsBombShape
+        {
+            get { return Shape == ItemShape.Bomb; }
+        }
+        
+        public bool IsLineShape
+        {
+            get { return Shape == ItemShape.HLine || Shape == ItemShape.VLine; }
+        }
 
         public Item(int color, ItemShape shape, int score = 20)
         {
@@ -30,6 +48,12 @@
                     return "(" + Color + ")";
                 case ItemShape.Cube:
                     return "[" + Color + "]";
+                case ItemShape.Bomb:
+                    return "/B/";
+                case ItemShape.HLine:
+                    return "---";
+                case ItemShape.VLine:
+                    return " I ";
                 default:
                     return "nil";
             }

@@ -10,6 +10,36 @@ namespace GameEngine
     [TestFixture]
     public class GameTests
     {
+        private static Item Ball(int color)
+        {
+            return new Item(color, ItemShape.Ball);
+        }
+
+        private static Item Cube(int color)
+        {
+            return new Item(color, ItemShape.Cube);
+        }
+
+        private static Item[,] CreateBoard(int w, int h, Item[] items)
+        {
+            var aItems = new Item[w, h];
+
+            int x = 0;
+            int y = 0;
+            foreach (Item it in items)
+            {
+                aItems[x, y] = it;
+                x++;
+                if (x == w)
+                {
+                    x = 0;
+                    y++;
+                }
+            }
+
+            return aItems;
+        }
+
         [Test]
         public void Reset()
         {
@@ -24,26 +54,6 @@ namespace GameEngine
             }
 
             Console.Out.WriteLine(game.Dump());
-        }
-
-        [Test]
-        public void ColFallDown()
-        {
-            var board = new Board();
-            board.Reset();
-            Item it10 = board.Items[1, 0];
-            Item it11 = board.Items[1, 1];
-            //Item it12 = board.Items[1, 2];
-            Item it13 = board.Items[1, 3];
-            Item it14 = board.Items[1, 4];
-            //
-            board.ColFallOneDown(new Point(1, 2));
-            //
-            Assert.AreNotEqual(board.Items[1, 0], it10); // new
-            Assert.AreEqual(board.Items[1, 1], it10); // fall
-            Assert.AreEqual(board.Items[1, 2], it11); // fall
-            Assert.AreEqual(board.Items[1, 3], it13); // old
-            Assert.AreEqual(board.Items[1, 4], it14); // old
         }
 
         [Test]
@@ -81,26 +91,14 @@ namespace GameEngine
         [Test]
         public void Match3Horizontal()
         {
-            var items = new Item[4, 4];
-            items[0, 0] = new Item(1, ItemShape.Ball);
-            items[1, 0] = new Item(2, ItemShape.Ball); //
-            items[2, 0] = new Item(1, ItemShape.Ball);
-            items[3, 0] = new Item(1, ItemShape.Ball);
-
-            items[0, 1] = new Item(1, ItemShape.Cube);
-            items[1, 1] = new Item(2, ItemShape.Cube);
-            items[2, 1] = new Item(3, ItemShape.Cube);
-            items[3, 1] = new Item(4, ItemShape.Cube);
-
-            items[0, 2] = new Item(5, ItemShape.Cube);
-            items[1, 2] = new Item(6, ItemShape.Cube);
-            items[2, 2] = new Item(7, ItemShape.Cube);
-            items[3, 2] = new Item(8, ItemShape.Cube);
-
-            items[0, 3] = new Item(9, ItemShape.Cube);
-            items[1, 3] = new Item(10, ItemShape.Cube);
-            items[2, 3] = new Item(11, ItemShape.Cube);
-            items[3, 3] = new Item(12, ItemShape.Cube);
+            Item[,] items = CreateBoard(4, 4, new[]
+            {
+                // 0        1        2        3
+                Ball(1), Ball(2), Ball(1), Ball(1), // 0
+                Cube(1), Cube(2), Cube(3), Cube(4), // 1
+                Cube(5), Cube(6), Cube(7), Cube(8), // 2
+                Cube(9), Cube(1), Cube(2), Cube(3), // 3
+            });
 
             var game = new Game(new Board(items));
             //
@@ -109,44 +107,31 @@ namespace GameEngine
             Assert.True(actions.Length >= 2);
             Assert.IsInstanceOf(typeof(SwapAction), actions[0]);
             Assert.IsInstanceOf(typeof(DestroyAction), actions[1]);
-            var destroyAct = (DestroyAction) actions[1];
-            var expectDestroyed = new List<Point>
+            var dAct = (DestroyAction) actions[1];
+            var destroyed = new List<Point>
             {
                 new Point(1, 0),
                 new Point(2, 0),
                 new Point(3, 0),
             };
-            Assert.AreEqual(expectDestroyed.Count, destroyAct.Positions.Length);
-            foreach (Point dPos in destroyAct.Positions)
+            Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
+            foreach (Point dPos in dAct.RegularDestroyedPos)
             {
-                Assert.True(expectDestroyed.Contains(dPos));
+                Assert.True(destroyed.Contains(dPos));
             }
         }
 
         [Test]
         public void Match3Horizontal2()
         {
-            var items = new Item[4, 4];
-
-            items[0, 0] = new Item(9, ItemShape.Cube);
-            items[1, 0] = new Item(10, ItemShape.Cube);
-            items[2, 0] = new Item(11, ItemShape.Cube);
-            items[3, 0] = new Item(12, ItemShape.Cube);
-
-            items[0, 1] = new Item(1, ItemShape.Cube);
-            items[1, 1] = new Item(2, ItemShape.Cube);
-            items[2, 1] = new Item(3, ItemShape.Cube);
-            items[3, 1] = new Item(4, ItemShape.Cube);
-
-            items[0, 2] = new Item(5, ItemShape.Cube);
-            items[1, 2] = new Item(6, ItemShape.Cube);
-            items[2, 2] = new Item(7, ItemShape.Cube);
-            items[3, 2] = new Item(8, ItemShape.Cube);
-
-            items[0, 3] = new Item(1, ItemShape.Ball);
-            items[1, 3] = new Item(2, ItemShape.Ball); //
-            items[2, 3] = new Item(1, ItemShape.Ball);
-            items[3, 3] = new Item(1, ItemShape.Ball);
+            Item[,] items = CreateBoard(4, 4, new[]
+            {
+                // 0        1        2        3
+                Cube(1), Cube(2), Cube(3), Cube(4), // 0
+                Cube(5), Cube(6), Cube(7), Cube(8), // 1
+                Cube(9), Cube(1), Cube(2), Cube(3), // 2
+                Ball(1), Ball(2), Ball(1), Ball(1), // 3
+            });
 
             var game = new Game(new Board(items));
             //
@@ -154,43 +139,31 @@ namespace GameEngine
             //
             Assert.IsInstanceOf(typeof(SwapAction), actions[0]);
             Assert.IsInstanceOf(typeof(DestroyAction), actions[1]);
-            var destroyAct = (DestroyAction) actions[1];
-            var expectDestroyed = new List<Point>
+            var dAct = (DestroyAction) actions[1];
+            var destroyed = new List<Point>
             {
                 new Point(1, 3),
                 new Point(2, 3),
                 new Point(3, 3),
             };
-            Assert.AreEqual(expectDestroyed.Count, destroyAct.Positions.Length);
-            foreach (Point dPos in destroyAct.Positions)
+            Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
+            foreach (Point dPos in dAct.RegularDestroyedPos)
             {
-                Assert.True(expectDestroyed.Contains(dPos));
+                Assert.True(destroyed.Contains(dPos));
             }
         }
 
         [Test]
         public void Match3Vertical()
         {
-            var items = new Item[4, 4];
-            items[0, 0] = new Item(1, ItemShape.Ball);
-            items[1, 0] = new Item(10, ItemShape.Cube);
-            items[2, 0] = new Item(11, ItemShape.Cube);
-            items[3, 0] = new Item(12, ItemShape.Cube);
-
-            items[0, 1] = new Item(1, ItemShape.Ball);
-            items[1, 1] = new Item(13, ItemShape.Cube);
-            items[2, 1] = new Item(14, ItemShape.Cube);
-            items[3, 1] = new Item(15, ItemShape.Cube);
-
-            items[0, 2] = new Item(2, ItemShape.Ball); //
-            items[1, 2] = new Item(16, ItemShape.Cube);
-            items[2, 2] = new Item(17, ItemShape.Cube);
-            items[3, 2] = new Item(18, ItemShape.Cube);
-
-            items[0, 3] = new Item(1, ItemShape.Ball);
-            items[1, 3] = new Item(19, ItemShape.Cube);
-            items[2, 3] = new Item(20, ItemShape.Cube);
-            items[3, 3] = new Item(21, ItemShape.Cube);
+            Item[,] items = CreateBoard(4, 4, new[]
+            {
+                // 0        1        2        3
+                Ball(1), Cube(4), Cube(5), Cube(6), // 0
+                Ball(1), Cube(7), Cube(8), Cube(9), // 1
+                Ball(2), Cube(4), Cube(5), Cube(6), // 2
+                Ball(1), Cube(7), Cube(8), Cube(9), // 3
+            });
 
             var game = new Game(new Board(items));
             //
@@ -198,34 +171,29 @@ namespace GameEngine
             //
             Assert.IsInstanceOf(typeof(SwapAction), actions[0]);
             Assert.IsInstanceOf(typeof(DestroyAction), actions[1]);
-            var destroyAct = (DestroyAction) actions[1];
-            var expectDestroyed = new List<Point>
+            var dAct = (DestroyAction) actions[1];
+            var destroyed = new List<Point>
             {
                 new Point(0, 0),
                 new Point(0, 1),
                 new Point(0, 2),
             };
-            Assert.AreEqual(expectDestroyed.Count, destroyAct.Positions.Length);
-            foreach (Point dPos in destroyAct.Positions)
+            Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
+            foreach (Point dPos in dAct.RegularDestroyedPos)
             {
-                Assert.True(expectDestroyed.Contains(dPos));
+                Assert.True(destroyed.Contains(dPos));
             }
         }
 
         [Test]
         public void FallDownAction()
         {
-            var items = new Item[4, 2];
-
-            items[0, 0] = new Item(9, ItemShape.Cube);
-            items[1, 0] = new Item(10, ItemShape.Cube);
-            items[2, 0] = new Item(11, ItemShape.Cube);
-            items[3, 0] = new Item(12, ItemShape.Cube);
-
-            items[0, 1] = new Item(1, ItemShape.Ball);
-            items[1, 1] = new Item(1, ItemShape.Ball);
-            items[2, 1] = new Item(2, ItemShape.Ball); //
-            items[3, 1] = new Item(1, ItemShape.Ball);
+            Item[,] items = CreateBoard(4, 2, new[]
+            {
+                // 0        1        2        3
+                Cube(5), Cube(6), Cube(7), Cube(8), // 0
+                Ball(1), Ball(1), Ball(2), Ball(1), // 1
+            });
 
             var game = new Game(new Board(items));
             //
@@ -247,21 +215,16 @@ namespace GameEngine
                 Assert.True(expectFallPos.Contains(fPos));
             }
         }
-        
+
         [Test]
         public void SpawnAction()
         {
-            var items = new Item[4, 2];
-
-            items[0, 0] = new Item(9, ItemShape.Cube);
-            items[1, 0] = new Item(10, ItemShape.Cube);
-            items[2, 0] = new Item(11, ItemShape.Cube);
-            items[3, 0] = new Item(12, ItemShape.Cube);
-
-            items[0, 1] = new Item(1, ItemShape.Ball);
-            items[1, 1] = new Item(1, ItemShape.Ball);
-            items[2, 1] = new Item(2, ItemShape.Ball); //
-            items[3, 1] = new Item(1, ItemShape.Ball);
+            Item[,] items = CreateBoard(4, 2, new[]
+            {
+                // 0        1        2        3
+                Cube(3), Cube(3), Cube(1), Cube(3), // 0
+                Ball(1), Ball(1), Ball(2), Ball(1), // 1
+            });
 
             var game = new Game(new Board(items));
             //
@@ -283,6 +246,69 @@ namespace GameEngine
             {
                 Assert.True(expectSpawnPos.Contains(spPos.Pos));
             }
+        }
+
+        [Test]
+        public void SpawnBonusLine()
+        {
+            Item[,] items = CreateBoard(4, 2, new[]
+            {
+                // 0        1        2        3
+                Cube(3), Ball(1), Cube(3), Cube(3), // 0
+                Ball(1), Ball(2), Ball(1), Ball(1), // 1
+            });
+
+            var game = new Game(new Board(items));
+            //
+            IAction[] actions = game.Swap(new Point(1, 0), new Point(1, 1));
+            //
+            var dAct = (DestroyAction) actions[1];
+            var hLine = new Point(1, 1);
+            Assert.AreEqual(hLine, dAct.SpawnBonuses[0].Pos);
+            Assert.True(game.Items[hLine.X, hLine.Y].Shape == ItemShape.HLine);
+        }
+
+        [Test]
+        public void SpawnBonusBombLine()
+        {
+            Item[,] items = CreateBoard(5, 2, new[]
+            {
+                // 0        1        2        3        4
+                Cube(3), Cube(3), Ball(1), Cube(3), Cube(3), // 0
+                Ball(1), Ball(1), Ball(2), Ball(1), Ball(1), // 1
+            });
+
+            var game = new Game(new Board(items));
+            //
+            IAction[] actions = game.Swap(new Point(2, 0), new Point(2, 1));
+            //
+            var dAct = (DestroyAction) actions[1];
+            var bomb = new Point(2, 1);
+            Assert.AreEqual(bomb, dAct.SpawnBonuses[0].Pos);
+            Assert.True(game.Items[bomb.X, bomb.Y].IsBombShape);
+        }
+
+        [Test]
+        public void SpawnBonusBombCross()
+        {
+            Item[,] items = CreateBoard(4, 3, new[]
+            {
+                // 0        1        2        3
+                Cube(1), Cube(1), Ball(1), Cube(1), // 0
+                Cube(1), Cube(1), Ball(1), Cube(1), // 1
+                Ball(1), Ball(1), Ball(2), Ball(1), // 2
+            });
+
+            var game = new Game(new Board(items));
+            //
+            IAction[] actions = game.Swap(new Point(2, 2), new Point(3, 2));
+            //
+            Console.Out.WriteLine(game.Dump());
+            var dAct = (DestroyAction) actions[1];
+            var bomb = new Point(2, 2);
+            Assert.AreEqual(bomb, dAct.SpawnBonuses[0].Pos);
+            // New spawned items can match with this bomb also
+            //Assert.True(game.Items[bomb.X, bomb.Y].IsBombShape);
         }
     }
 }

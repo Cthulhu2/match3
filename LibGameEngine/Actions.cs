@@ -17,7 +17,10 @@ namespace GameEngine
 
     public class DestroyAction : IAction
     {
-        public Point[] Positions { get; set; }
+        public Point[] RegularDestroyedPos { get; set; }
+        public SpawnPos[] SpawnBonuses { get; set; }
+        public Point[] BombDestroyedPos { get; set; }
+        public Point[] LineDestroyedPos { get; set; }
     }
 
     public class FallDownPos

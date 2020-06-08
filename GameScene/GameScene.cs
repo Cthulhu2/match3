@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GameEngine;
@@ -130,6 +131,11 @@ public class GameScene : Node2D
         }
     }
 
+    public void OnSpawnBonusesTweenEnd()
+    {
+        ProcessNextAction();
+    }
+    
     public void OnDestroyActionEnd()
     {
         _itemDestroyTween.RemoveAll();
@@ -140,8 +146,8 @@ public class GameScene : Node2D
             return;
         }
 
-        GD.Print($"OnDestroyActionEnd. Remove: {dAct.Positions}");
-        foreach (Point dPos in dAct.Positions)
+        GD.Print($"OnDestroyActionEnd. Remove: {dAct.RegularDestroyedPos}");
+        foreach (Point dPos in dAct.RegularDestroyedPos)
         {
             Sprite sprite = _itemSprites[dPos.X, dPos.Y];
             _itemSprites[dPos.X, dPos.Y] = null;
@@ -154,7 +160,23 @@ public class GameScene : Node2D
         //     GD.Print(l);
         // }
         UpdLblScores();
-        ProcessNextAction();
+        if (dAct.SpawnBonuses.Length > 0)
+        {
+            foreach (SpawnPos spPos in dAct.SpawnBonuses)
+            {
+                Sprite itemSprite =
+                    SpawnSprite(spPos.Pos.X, spPos.Pos.Y, spPos.Item);
+                itemSprite.Scale = new Vector2(5, 0);
+                itemSprite.Visible = true;
+                _itemSpawnTween.Tween(itemSprite);
+            }
+            _itemSpawnTween.InterpolateCallback(this, "OnSpawnBonusesTweenEnd");
+            _itemSpawnTween.Start();
+        }
+        else
+        {
+            ProcessNextAction();            
+        }
     }
 
     public void OnFallDownActionEnd()
@@ -213,11 +235,11 @@ public class GameScene : Node2D
         }
         else if (action is DestroyAction dAct)
         {
-            foreach (Point dPos in dAct.Positions)
+            foreach (Point dPos in dAct.RegularDestroyedPos)
             {
                 _itemDestroyTween.Tween(_itemSprites[dPos.X, dPos.Y]);
             }
-
+            // TODO: Destroy dAct.LineDestroyedPos/BombDestroyedPos
             _itemDestroyTween.InterpolateCallback(this, "OnDestroyActionEnd");
             _itemDestroyTween.Start();
         }
@@ -335,10 +357,15 @@ public class GameScene : Node2D
         string color = Colors[item.Color];
         string texture = $"{shape}_{color}.png";
 
-        return new Sprite
+        var sprite = new Sprite
         {
             Texture = GD.Load<Texture>("res://GameScene/Art/" + texture)
         };
+        if (item.Shape == ItemShape.VLine)
+        {
+            sprite.Rotation = (float) (90f * (Math.PI / 180f));
+        }
+        return sprite;
     }
 
     private void SpawnSprites()
@@ -356,10 +383,6 @@ public class GameScene : Node2D
     private Sprite SpawnSprite(int x, int y, Item item)
     {
         Sprite sprite = GenSprite(item);
-        if (item.Shape == ItemShape.VLine)
-        {
-            sprite.Rotation = 90f;
-        }
 
         sprite.Scale = new Vector2(5, 5);
         sprite.Position = ToItemTablePos(x, y);
