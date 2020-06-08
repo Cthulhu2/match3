@@ -11,43 +11,38 @@ public class DestroyAct : Object
     private readonly GameScene _scene;
     private readonly Sprite[,] _sprites;
     private readonly DestroyAction _act;
-    private readonly ItemDestroyTween _destroyTween;
-    private readonly ItemSpawnTween _spawnTween;
+    private readonly Tween _tween;
 
     private DestroyAct(GameScene scene,
                        Sprite[,] itemSprites,
                        DestroyAction act,
-                       ItemDestroyTween destroyTween,
-                       ItemSpawnTween spawnTween)
+                       Tween tween)
     {
         _scene = scene;
         _sprites = itemSprites;
         _act = act;
-        _destroyTween = destroyTween;
-        _spawnTween = spawnTween;
+        _tween = tween;
     }
 
     public static async Task Exec(GameScene scene,
                                   Sprite[,] sprites,
                                   DestroyAction act,
-                                  ItemDestroyTween destroyTween,
-                                  ItemSpawnTween spawnTween)
+                                  Tween tween)
     {
-        await new DestroyAct(scene, sprites, act, destroyTween, spawnTween)
-            .Exec();
+        await new DestroyAct(scene, sprites, act, tween).Exec();
     }
 
     private async Task Exec()
     {
         foreach (Point dPos in _act.RegularDestroyedPos)
         {
-            _destroyTween.Tween(_sprites[dPos.X, dPos.Y]);
+            RegularDestroyTween(_sprites[dPos.X, dPos.Y]);
         }
 
         // TODO: Destroy dAct.LineDestroyedPos/BombDestroyedPos
-        _destroyTween.Start();
-        await ToSignal(_destroyTween, "tween_all_completed");
-        _destroyTween.RemoveAll();
+        _tween.Start();
+        await ToSignal(_tween, "tween_all_completed");
+        _tween.RemoveAll();
 
         _scene.UpdLblScores();
 
@@ -73,14 +68,34 @@ public class DestroyAct : Object
                     .SpawnSprite(spPos.Pos.X, spPos.Pos.Y, spPos.Item);
                 itemSprite.Scale = new Vector2(5, 0);
                 itemSprite.Visible = true;
-                _spawnTween.Tween(itemSprite);
+                BonusSpawnTween(itemSprite);
             }
 
-            _spawnTween.Start();
-            await ToSignal(_spawnTween, "tween_all_completed");
-            _spawnTween.RemoveAll();
+            _tween.Start();
+            await ToSignal(_tween, "tween_all_completed");
+            _tween.RemoveAll();
         }
 
         await Task.CompletedTask;
+    }
+    
+    private void RegularDestroyTween(Sprite sprite)
+    {
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            sprite.Scale.y, 0,
+            0.25f, Tween.TransitionType.Quad, Tween.EaseType.Out);
+
+        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
+            sprite.Position.y, sprite.Position.y + sprite.GetRect().Size.y,
+            0.25f, Tween.TransitionType.Quad, Tween.EaseType.Out);
+    }
+    
+    // ReSharper disable once SuggestBaseTypeForParameter
+    private void BonusSpawnTween(Sprite sprite)
+    {
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            0, 5,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
+            0.125f);
     }
 }

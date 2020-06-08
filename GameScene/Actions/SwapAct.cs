@@ -7,28 +7,21 @@ using Godot;
 public class SwapAct : Object
 {
     private readonly Sprite[,] _sprites;
-    private readonly ItemHMovTween _hMovTween;
-    private readonly ItemVMovTween _vMovTween;
+    private readonly Tween _tween;
     private readonly SwapAction _act;
 
-    private SwapAct(Sprite[,] itemSprites,
-                    SwapAction action,
-                    ItemHMovTween itemHMovTween,
-                    ItemVMovTween itemVMovTween)
+    private SwapAct(Sprite[,] itemSprites, SwapAction action, Tween tween)
     {
         _sprites = itemSprites;
         _act = action;
-        _hMovTween = itemHMovTween;
-        _vMovTween = itemVMovTween;
+        _tween = tween;
     }
 
     public static async Task Exec(Sprite[,] sprites,
                                   SwapAction act,
-                                  ItemHMovTween hMovTween,
-                                  ItemVMovTween vMovTween)
+                                  Tween tween)
     {
-        await new SwapAct(sprites, act, hMovTween, vMovTween)
-            .Exec();
+        await new SwapAct(sprites, act, tween).Exec();
     }
 
     private async Task Exec()
@@ -38,24 +31,108 @@ public class SwapAct : Object
         Sprite destSprite = _sprites[_act.DestPos.X, _act.DestPos.Y];
         if (isHorizontal)
         {
-            _hMovTween.Tween(srcSprite, destSprite.Position);
-            _hMovTween.Tween(destSprite, srcSprite.Position);
-            _hMovTween.Start();
-            await ToSignal(_hMovTween, "tween_all_completed");
-            _hMovTween.RemoveAll();
+            HMoveTween(srcSprite, destSprite.Position);
+            HMoveTween(destSprite, srcSprite.Position);
         }
         else
         {
-            _vMovTween.Tween(srcSprite, destSprite.Position);
-            _vMovTween.Tween(destSprite, srcSprite.Position);
-            _vMovTween.Start();
-            await ToSignal(_vMovTween, "tween_all_completed");
-            _vMovTween.RemoveAll();
+            VMovTween(srcSprite, destSprite.Position);
+            VMovTween(destSprite, srcSprite.Position);
         }
+
+        _tween.Start();
+        await ToSignal(_tween, "tween_all_completed");
+        //_tween.RemoveAll();
 
         _sprites[_act.DestPos.X, _act.DestPos.Y] = srcSprite;
         _sprites[_act.SrcPos.X, _act.SrcPos.Y] = destSprite;
 
         await Task.CompletedTask;
+    }
+
+    // ReSharper disable once SuggestBaseTypeForParameter
+    private void HMoveTween(Sprite sprite, Vector2 targetPos)
+    {
+        // Move
+        _tween.InterpolateProperty(sprite, new NodePath("position:x"),
+            sprite.Position.x, targetPos.x,
+            0.5f, Tween.TransitionType.Linear, Tween.EaseType.In);
+
+        // Jump
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            sprite.Scale.y, sprite.Scale.y - 1,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.Out);
+
+        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
+            sprite.Position.y, sprite.Position.y - 8,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.Out);
+
+        // Fall
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            sprite.Scale.y - 1, sprite.Scale.y,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
+            0.125f);
+
+        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
+            sprite.Position.y - 8, sprite.Position.y,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
+            0.125f);
+
+        // Jump
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            sprite.Scale.y, sprite.Scale.y - 1,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.Out,
+            0.25f);
+
+        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
+            sprite.Position.y, sprite.Position.y - 8,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.Out,
+            0.25f);
+
+        // Fall
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            sprite.Scale.y - 1, sprite.Scale.y,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
+            0.375f);
+
+        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
+            sprite.Position.y - 8, sprite.Position.y,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
+            0.375f);
+    }
+
+    // ReSharper disable once SuggestBaseTypeForParameter
+    private void VMovTween(Sprite sprite, Vector2 targetPos)
+    {
+        // Move
+        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
+            sprite.Position.y, targetPos.y,
+            0.5f, Tween.TransitionType.Linear, Tween.EaseType.In);
+
+        bool isDownTo = (sprite.Position.y < targetPos.y);
+        if (isDownTo)
+        {
+            // Take a right side
+            _tween.InterpolateProperty(sprite, new NodePath("position:x"),
+                sprite.Position.x, sprite.Position.x + 10,
+                0.25f, Tween.TransitionType.Linear, Tween.EaseType.In);
+
+            _tween.InterpolateProperty(sprite, new NodePath("position:x"),
+                sprite.Position.x + 10, sprite.Position.x,
+                0.25f, Tween.TransitionType.Linear, Tween.EaseType.In,
+                0.25f);
+        }
+        else
+        {
+            // Take a left side
+            _tween.InterpolateProperty(sprite, new NodePath("position:x"),
+                sprite.Position.x, sprite.Position.x - 10,
+                0.25f, Tween.TransitionType.Linear, Tween.EaseType.In);
+
+            _tween.InterpolateProperty(sprite, new NodePath("position:x"),
+                sprite.Position.x - 10, sprite.Position.x,
+                0.25f, Tween.TransitionType.Linear, Tween.EaseType.In,
+                0.25f);
+        }
     }
 }

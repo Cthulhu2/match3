@@ -21,11 +21,7 @@ public class GameScene : Node2D
     private Sprite _selSprite;
     private Point _selSpritePoint = new Point(-1, -1);
 
-    private ItemHMovTween _itemHMovTween;
-    private ItemVMovTween _itemVMovTween;
-    private ItemFallTween _itemFallTween;
-    private ItemDestroyTween _itemDestroyTween;
-    private ItemSpawnTween _itemSpawnTween;
+    private Tween _tween;
     public TextureRect ItemTable { get; private set; }
 
     private Label _lblScores;
@@ -47,16 +43,9 @@ public class GameScene : Node2D
         _lblTime = GetNode<Label>(new NodePath("Canvas/LblTime"));
         ItemTable = GetNode<TextureRect>(new NodePath("Canvas/ItemTable"));
         _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
-        _itemHMovTween = GetNode<ItemHMovTween>(new NodePath("ItemHMovTween"));
-        _itemVMovTween = GetNode<ItemVMovTween>(new NodePath("ItemVMovTween"));
-        _itemFallTween = GetNode<ItemFallTween>(new NodePath("ItemFallTween"));
-        _itemDestroyTween =
-            GetNode<ItemDestroyTween>(new NodePath("ItemDestroyTween"));
-        _itemSpawnTween =
-            GetNode<ItemSpawnTween>(new NodePath("ItemSpawnTween"));
+        _tween = GetNode<Tween>(new NodePath("Tween"));
 
-
-        _timer = GetNode<Timer>(new NodePath("Timer"));
+        _timer = GetNode<Timer>(new NodePath("GameTimer"));
         _timer.WaitTime = 1; // sec
         _timer.Connect("timeout", this, "OnTimerTick");
         _timer.Start();
@@ -135,26 +124,21 @@ public class GameScene : Node2D
         switch (action)
         {
             case SwapAction swAct:
-                await SwapAct.Exec(
-                    _itemSprites, swAct,
-                    _itemHMovTween, _itemVMovTween);
+                await SwapAct.Exec(_itemSprites, swAct, _tween);
                 break;
 
             case DestroyAction dAct:
-                await DestroyAct.Exec(
-                    this, _itemSprites, dAct,
-                    _itemDestroyTween, _itemSpawnTween);
+                await DestroyAct.Exec(this, _itemSprites, dAct, _tween);
                 break;
 
             case FallDownAction fdAct:
             {
-                Task tFall = FallDownAct.Exec(_itemSprites, fdAct,
-                    _itemFallTween);
+                Task tFall = FallDownAct.Exec(_itemSprites, fdAct, _tween);
 
                 if (_actions.Peek() is SpawnAction)
                 {
                     var spAct = (SpawnAction) _actions.Dequeue();
-                    await SpawnAct.Exec(this, spAct, _itemSpawnTween);
+                    await SpawnAct.Exec(this, spAct, _tween);
                 }
 
                 await tFall;

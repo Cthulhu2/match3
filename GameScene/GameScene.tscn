@@ -1,13 +1,8 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://GameScene/GameScene.cs" type="Script" id=1]
 [ext_resource path="res://GameScene/Art/ItemTable.png" type="Texture" id=2]
-[ext_resource path="res://GameScene/ItemHMovTween.cs" type="Script" id=3]
-[ext_resource path="res://GameScene/ItemVMovTween.cs" type="Script" id=4]
 [ext_resource path="res://GameScene/ItemSelTween.cs" type="Script" id=5]
-[ext_resource path="res://GameScene/ItemDestroyTween.cs" type="Script" id=6]
-[ext_resource path="res://GameScene/ItemFallTween.cs" type="Script" id=7]
-[ext_resource path="res://GameScene/ItemSpawnTween.cs" type="Script" id=8]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 1 )
@@ -60,7 +55,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Timer" type="Timer" parent="."]
+[node name="GameTimer" type="Timer" parent="."]
 wait_time = 60.0
 autostart = true
 
@@ -69,17 +64,4 @@ repeat = true
 playback/repeat = true
 script = ExtResource( 5 )
 
-[node name="ItemHMovTween" type="Tween" parent="."]
-script = ExtResource( 3 )
-
-[node name="ItemVMovTween" type="Tween" parent="."]
-script = ExtResource( 4 )
-
-[node name="ItemDestroyTween" type="Tween" parent="."]
-script = ExtResource( 6 )
-
-[node name="ItemFallTween" type="Tween" parent="."]
-script = ExtResource( 7 )
-
-[node name="ItemSpawnTween" type="Tween" parent="."]
-script = ExtResource( 8 )
+[node name="Tween" type="Tween" parent="."]

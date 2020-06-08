@@ -7,24 +7,21 @@ using Godot;
 public class SpawnAct : Object
 {
     private readonly GameScene _scene;
-    private readonly ItemSpawnTween _spawnTween;
+    private readonly Tween _tween;
     private readonly SpawnAction _act;
 
-    private SpawnAct(GameScene scene,
-                     SpawnAction action,
-                     ItemSpawnTween spawnTween)
+    private SpawnAct(GameScene scene, SpawnAction action, Tween tween)
     {
         _scene = scene;
         _act = action;
-        _spawnTween = spawnTween;
+        _tween = tween;
     }
 
     public static async Task Exec(GameScene scene,
                                   SpawnAction act,
-                                  ItemSpawnTween spawnTween)
+                                  Tween tween)
     {
-        await new SpawnAct(scene, act, spawnTween)
-            .Exec();
+        await new SpawnAct(scene, act, tween).Exec();
     }
 
     private async Task Exec()
@@ -35,13 +32,22 @@ public class SpawnAct : Object
                 _scene.SpawnSprite(spPos.Pos.X, spPos.Pos.Y, spPos.Item);
             itemSprite.Scale = new Vector2(5, 0);
             itemSprite.Visible = true;
-            _spawnTween.Tween(itemSprite);
+            SpawnTween(itemSprite);
         }
 
-        _spawnTween.Start();
-        await ToSignal(_spawnTween, "tween_all_completed");
-        _spawnTween.RemoveAll();
+        _tween.Start();
+        await ToSignal(_tween, "tween_all_completed");
+        //_tween.RemoveAll();
         
         await Task.CompletedTask;
+    }
+    
+    // ReSharper disable once SuggestBaseTypeForParameter
+    private void SpawnTween(Sprite sprite)
+    {
+        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
+            0, 5,
+            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
+            0.125f);
     }
 }
