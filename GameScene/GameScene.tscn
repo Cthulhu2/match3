@@ -1,8 +1,113 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://GameScene/GameScene.cs" type="Script" id=1]
 [ext_resource path="res://GameScene/Art/ItemTable.png" type="Texture" id=2]
+[ext_resource path="res://GameScene/Art/Bomb_Exploded.png" type="Texture" id=3]
+[ext_resource path="res://GameScene/Art/Bomb_Blue_Fire_2.png" type="Texture" id=4]
 [ext_resource path="res://GameScene/ItemSelTween.cs" type="Script" id=5]
+[ext_resource path="res://GameScene/Art/Bomb_Blue_Fire_1.png" type="Texture" id=6]
+[ext_resource path="res://GameScene/Art/Bomb_Grey_Fire_2.png" type="Texture" id=7]
+[ext_resource path="res://GameScene/Art/Bomb_Green_Fire_2.png" type="Texture" id=8]
+[ext_resource path="res://GameScene/Art/Bomb_Grey_Fire_1.png" type="Texture" id=9]
+[ext_resource path="res://GameScene/Art/Bomb_Green_Fire_1.png" type="Texture" id=10]
+
+[sub_resource type="SpriteFrames" id=1]
+animations = [ {
+"frames": [ ExtResource( 6 ), ExtResource( 4 ), ExtResource( 3 ), ExtResource( 10 ), ExtResource( 8 ), ExtResource( 3 ), ExtResource( 9 ), ExtResource( 7 ), ExtResource( 3 ) ],
+"loop": true,
+"name": "default",
+"speed": 5.0
+} ]
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 3.16815, 2.88746 )
+
+[sub_resource type="Animation" id=3]
+resource_name = "Bomb_Blue_Explosion"
+length = 0.5
+loop = true
+step = 0.05
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimatedSprite:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.001, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 2,
+"values": [ 0, 0, 1, 2 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("AnimatedSprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1 ), Vector2( 1, 1 ), Vector2( 3, 3 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "Bomb_Green_Explosion"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimatedSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 3, 4, 5 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("AnimatedSprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.199942, 0.49302 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1 ), Vector2( 1, 1 ), Vector2( 3, 3 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "Bomb_Grey_Explosion"
+length = 0.5
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimatedSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 2,
+"values": [ 6, 7, 8 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("AnimatedSprite:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1 ), Vector2( 1, 1 ), Vector2( 3, 3 ) ]
+}
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 1 )
@@ -54,6 +159,27 @@ expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="BombTemplate" type="KinematicBody2D" parent="Canvas"]
+visible = false
+position = Vector2( 256, 87 )
+scale = Vector2( 5, 5 )
+skew = 4.37114e-08
+
+[node name="AnimatedSprite" type="AnimatedSprite" parent="Canvas/BombTemplate"]
+scale = Vector2( 1, 1 )
+skew = 4.37114e-08
+frames = SubResource( 1 )
+frame = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Canvas/BombTemplate"]
+scale = Vector2( 1e-05, 1e-05 )
+shape = SubResource( 2 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Canvas/BombTemplate"]
+anims/Bomb_Blue_Explosion = SubResource( 3 )
+anims/Bomb_Green_Explosion = SubResource( 4 )
+anims/Bomb_Grey_Explosion = SubResource( 5 )
 
 [node name="GameTimer" type="Timer" parent="."]
 wait_time = 60.0

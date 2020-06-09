@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using GameEngine;
 using Godot;
@@ -27,6 +28,7 @@ public class GameScene : Node2D
     private Label _lblScores;
     private Label _lblTime;
     private Sprite[,] _itemSprites;
+    private KinematicBody2D _bombTemplate;
 
     private Queue<IAction> _actions;
     private bool _inProcess;
@@ -44,6 +46,8 @@ public class GameScene : Node2D
         ItemTable = GetNode<TextureRect>(new NodePath("Canvas/ItemTable"));
         _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
         _tween = GetNode<Tween>(new NodePath("Tween"));
+        _bombTemplate =
+            GetNode<KinematicBody2D>(new NodePath("Canvas/BombTemplate"));
 
         _timer = GetNode<Timer>(new NodePath("GameTimer"));
         _timer.WaitTime = 1; // sec
@@ -95,6 +99,11 @@ public class GameScene : Node2D
     {
         IAction[] actions = Game.Swap(_selSpritePoint, new Point(x, y));
 
+        ProcessActions(actions);
+    }
+
+    private async void ProcessActions(IAction[] actions)
+    {
         _selSprite = null;
         _selSpritePoint = new Point(-1, -1);
 
@@ -105,11 +114,6 @@ public class GameScene : Node2D
             _actions.Enqueue(action);
         }
 
-        ProcessActions();
-    }
-
-    private async void ProcessActions()
-    {
         _inProcess = true;
         while (_actions.Count > 0)
         {
@@ -121,6 +125,7 @@ public class GameScene : Node2D
 
     private async Task ProcessAction(IAction action)
     {
+        GD.Print(action);
         switch (action)
         {
             case SwapAction swAct:
@@ -128,7 +133,8 @@ public class GameScene : Node2D
                 break;
 
             case DestroyAction dAct:
-                await DestroyAct.Exec(this, _itemSprites, dAct, _tween);
+                await DestroyAct.Exec(this, _itemSprites, dAct, _tween,
+                    _bombTemplate);
                 break;
 
             case FallDownAction fdAct:
@@ -144,6 +150,10 @@ public class GameScene : Node2D
                 await tFall;
                 break;
             }
+
+            case SpawnAction spAct:
+                await SpawnAct.Exec(this, spAct, _tween);
+                break;
         }
 
         await Task.CompletedTask;
@@ -151,14 +161,38 @@ public class GameScene : Node2D
 
     public override void _Input(InputEvent evt)
     {
-        if (!(evt is InputEventMouseButton))
+        if (evt is InputEventMouse)
         {
-            return;
+            OnMouseEvent((InputEventMouse) evt);
         }
+        else if (evt is InputEventKey)
+        {
+            OnKeyEvent((InputEventKey) evt);
+        }
+    }
 
-        var mEvt = (InputEventMouseButton) evt;
+    private void OnKeyEvent(InputEventKey evt)
+    {
+        if (!_inProcess
+            && evt.IsPressed()
+            && evt.Alt)
+        {
+            GD.Print($"OnKeyEvent. evt: {evt}");
+            if (evt.Scancode == (ulong) KeyList.Key1)
+            {
+                ProcessActions(Game.CheatBomb());
+            }
+            else if (evt.Scancode == (ulong) KeyList.Key2)
+            {
+                ProcessActions(Game.CheatLine());
+            }
+        }
+    }
+
+    private void OnMouseEvent(InputEventMouse evt)
+    {
         if (!evt.IsPressed()
-            || !ItemTable.GetGlobalRect().HasPoint(mEvt.Position))
+            || !ItemTable.GetGlobalRect().HasPoint(evt.Position))
         {
             return;
         }
@@ -168,7 +202,7 @@ public class GameScene : Node2D
             for (int x = 0; x < Game.BoardWidth; x++)
             {
                 Sprite s = _itemSprites[x, y];
-                if (s != null && s.GetRect().HasPoint(s.ToLocal(mEvt.Position)))
+                if (s != null && s.GetRect().HasPoint(s.ToLocal(evt.Position)))
                 {
                     OnSpriteClicked(x, y);
                 }
@@ -201,7 +235,7 @@ public class GameScene : Node2D
         UpdLblTime();
     }
 
-    private static readonly Dictionary<int, string> Colors =
+    public static readonly Dictionary<int, string> Colors =
         new Dictionary<int, string>
         {
             {1, "Green"},
@@ -255,6 +289,15 @@ public class GameScene : Node2D
 
         sprite.Scale = new Vector2(5, 5);
         sprite.Position = ToItemTablePos(x, y);
+
+        if (_itemSprites[x, y] != null)
+        {
+            GD.PrintErr($"Doubled Sprite!!! {x}:{y} {item}");
+            System.Environment.StackTrace
+                .Split(System.Environment.NewLine)
+                .ToList()
+                .ForEach(l => GD.PrintErr(l));
+        }
 
         _itemSprites[x, y] = sprite;
         ItemTable.AddChild(sprite);

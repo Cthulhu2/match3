@@ -115,9 +115,9 @@ namespace GameEngine
                 new Point(3, 0),
             };
             Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
-            foreach (Point dPos in dAct.RegularDestroyedPos)
+            foreach (ItemPos dPos in dAct.RegularDestroyedPos)
             {
-                Assert.True(destroyed.Contains(dPos));
+                Assert.True(destroyed.Contains(dPos.Pos));
             }
         }
 
@@ -147,9 +147,9 @@ namespace GameEngine
                 new Point(3, 3),
             };
             Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
-            foreach (Point dPos in dAct.RegularDestroyedPos)
+            foreach (ItemPos dPos in dAct.RegularDestroyedPos)
             {
-                Assert.True(destroyed.Contains(dPos));
+                Assert.True(destroyed.Contains(dPos.Pos));
             }
         }
 
@@ -179,9 +179,9 @@ namespace GameEngine
                 new Point(0, 2),
             };
             Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
-            foreach (Point dPos in dAct.RegularDestroyedPos)
+            foreach (ItemPos dPos in dAct.RegularDestroyedPos)
             {
-                Assert.True(destroyed.Contains(dPos));
+                Assert.True(destroyed.Contains(dPos.Pos));
             }
         }
 
@@ -242,7 +242,7 @@ namespace GameEngine
                 new Point(2, 0),
             };
             Assert.AreEqual(expectSpawnPos.Count, spawnAct.Positions.Length);
-            foreach (SpawnPos spPos in spawnAct.Positions)
+            foreach (ItemPos spPos in spawnAct.Positions)
             {
                 Assert.True(expectSpawnPos.Contains(spPos.Pos));
             }
@@ -307,8 +307,7 @@ namespace GameEngine
             var dAct = (DestroyAction) actions[1];
             var bomb = new Point(2, 2);
             Assert.AreEqual(bomb, dAct.SpawnBonuses[0].Pos);
-            // New spawned items can match with this bomb also
-            //Assert.True(game.Items[bomb.X, bomb.Y].IsBombShape);
+            Assert.True(dAct.SpawnBonuses[0].Item.IsBombShape);
         }
     }
 }

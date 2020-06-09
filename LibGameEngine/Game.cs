@@ -144,7 +144,7 @@ namespace GameEngine
             return pos.ToArray();
         }
 
-        private Point[] GetBombNeighbour(Point bombPos)
+        public Point[] GetBombNeighbour(Point bombPos)
         {
             var pos = new List<Point>();
 
@@ -183,15 +183,15 @@ namespace GameEngine
 
             return targetPos;
         }
-        
-        private SpawnPos CalcBonusSpawn(Point src, Point dest, Point[] line)
+
+        private ItemPos CalcBonusSpawn(Point src, Point dest, Point[] line)
         {
             if (line.Length == 5)
             {
                 Point targetPos = TargetBonusPos(src, dest, line);
 
                 int color = Items[targetPos.X, targetPos.Y].Color;
-                return new SpawnPos(targetPos, new Item(color, ItemShape.Bomb));
+                return new ItemPos(targetPos, new Item(color, ItemShape.Bomb));
             }
 
             if (line.Length == 4)
@@ -202,15 +202,15 @@ namespace GameEngine
                 bool vertical = (line[0].X == line[1].X);
                 ItemShape shape = vertical ? ItemShape.VLine : ItemShape.HLine;
 
-                return new SpawnPos(targetPos, new Item(color, shape));
+                return new ItemPos(targetPos, new Item(color, shape));
             }
 
             return null;
         }
 
-        private SpawnPos CalcBonusSpawn(Point src,
-                                        Point dest,
-                                        Tuple<Point[], Point[]> cross)
+        private ItemPos CalcBonusSpawn(Point src,
+                                       Point dest,
+                                       Tuple<Point[], Point[]> cross)
         {
             Point targetPos;
             (Point[] line1, Point[] line2) = cross;
@@ -229,9 +229,10 @@ namespace GameEngine
             }
 
             int color = Items[targetPos.X, targetPos.Y].Color;
-            return new SpawnPos(targetPos, new Item(color, ItemShape.Bomb));
+            return new ItemPos(targetPos, new Item(color, ItemShape.Bomb));
         }
 
+        // ReSharper disable once ReturnTypeCanBeEnumerable.Local
         private List<IAction> ProcessMatch(Point src, Point dest, MatchRes match)
         {
             var actions = new List<IAction>();
@@ -244,57 +245,60 @@ namespace GameEngine
                 regularDestroy.UnionWith(line1);
                 regularDestroy.UnionWith(line2);
             });
+            ItemPos[] regularDestroyItemPos = regularDestroy
+                .Select(p => new ItemPos(p, Items[p.X, p.Y]))
+                .ToArray();
             //
-            var bonuses = new List<SpawnPos>();
+            var bonuses = new List<ItemPos>();
             match.MatchLines.ForEach(line =>
             {
-                SpawnPos bonus = CalcBonusSpawn(src, dest, line);
-                if (bonus != null)
+                ItemPos bonus = CalcBonusSpawn(src, dest, line);
+                if (bonus != null && bonuses.All(b => b.Pos != bonus.Pos))
                 {
                     bonuses.Add(bonus);
                 }
             });
             match.MatchCrosses.ForEach(cross =>
             {
-                SpawnPos bonus = CalcBonusSpawn(src, dest, cross);
-                if (bonus != null)
+                ItemPos bonus = CalcBonusSpawn(src, dest, cross);
+                if (bonus != null && bonuses.All(b => b.Pos != bonus.Pos))
                 {
                     bonuses.Add(bonus);
                 }
             });
 
-            var exploded = new List<Point>();
-            Point[] bombBonuses = regularDestroy
+            var exploded = new HashSet<Point>();
+            Point[] byBombs = regularDestroy
                 .Where(p => Items[p.X, p.Y].IsBombShape)
                 .ToArray();
-            foreach (Point bomb in bombBonuses)
+            foreach (Point bomb in byBombs)
             {
-                Point[] bombNeighbours = GetBombNeighbour(bomb)
+                List<Point> bombNeighbours = GetBombNeighbour(bomb)
                     .Except(regularDestroy)
-                    .ToArray();
-                exploded.AddRange(bombNeighbours);
+                    .ToList();
+                bombNeighbours.ForEach(p => exploded.Add(p));
             }
 
-            var exterminated = new List<Point>();
-            Point[] lineBonuses = regularDestroy
+            var exterminated = new HashSet<Point>();
+            Point[] byLines = regularDestroy
                 .Where(p => Items[p.X, p.Y].IsLineShape)
                 .ToArray();
-            foreach (Point linePos in lineBonuses)
+            foreach (Point linePos in byLines)
             {
                 Item it = Items[linePos.X, linePos.Y];
-                Point[] line = GetLine(linePos, it.Shape)
+                List<Point> line = GetLine(linePos, it.Shape)
                     .Except(regularDestroy)
-                    .ToArray();
-                exterminated.AddRange(line);
+                    .ToList();
+                line.ForEach(p => exterminated.Add(p));
             }
 
+            // Update board
             Point[] destroyed = new List<Point>()
                 .Union(regularDestroy)
                 .Union(exploded)
                 .Union(exterminated)
                 .ToArray();
 
-            // Update board
             foreach (Point m in destroyed)
             {
                 Item item = Items[m.X, m.Y];
@@ -306,7 +310,7 @@ namespace GameEngine
             //
             actions.Add(new DestroyAction
             {
-                RegularDestroyedPos = regularDestroy.ToArray(),
+                RegularDestroyedPos = regularDestroyItemPos,
                 SpawnBonuses = bonuses.ToArray(),
                 BombDestroyedPos = exploded.ToArray(),
                 LineDestroyedPos = exterminated.ToArray(),
@@ -316,10 +320,51 @@ namespace GameEngine
                 .ToArray();
             actions.Add(new FallDownAction {Positions = fallen});
 
-            SpawnPos[] spawned = _board.SpawnItems().ToArray();
+            ItemPos[] spawned = _board.SpawnItems().ToArray();
             actions.Add(new SpawnAction {Positions = spawned});
 
             return actions;
+        }
+
+        public IAction[] CheatBomb()
+        {
+            var rnd = new Random();
+            ItemShape shape = rnd.Next(2) > 0 ? ItemShape.Ball : ItemShape.Cube;
+            int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
+            int x = rnd.Next(BoardWidth - 3);
+            int y = rnd.Next(BoardHeight);
+            var dAct = new DestroyAction
+            {
+                RegularDestroyedPos = new[]
+                {
+                    new ItemPos(new Point(x, y), Items[x, y]),
+                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
+                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
+                },
+                SpawnBonuses = new ItemPos[0],
+                BombDestroyedPos = new Point[0],
+                LineDestroyedPos = new Point[0],
+            };
+
+            Items[x, y] = new Item(color, shape);
+            Items[x + 1, y] = new Item(color, ItemShape.Bomb);
+            Items[x + 2, y] = new Item(color, shape);
+
+            var spAct = new SpawnAction
+            {
+                Positions = new[]
+                {
+                    new ItemPos(new Point(x, y), Items[x, y]),
+                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
+                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
+                }
+            };
+            return new IAction[] {dAct, spAct};
+        }
+
+        public IAction[] CheatLine()
+        {
+            throw new NotImplementedException();
         }
     }
 }

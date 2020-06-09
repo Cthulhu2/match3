@@ -90,9 +90,9 @@ namespace GameEngine
             } while (matches.Any());
         }
 
-        public List<SpawnPos> SpawnItems()
+        public List<ItemPos> SpawnItems()
         {
-            var spawnPos = new List<SpawnPos>();
+            var spawnPos = new List<ItemPos>();
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
@@ -101,7 +101,7 @@ namespace GameEngine
                     {
                         Item item = CreateRandomItem();
                         Items[x, y] = item;
-                        spawnPos.Add(new SpawnPos(new Point(x, y), item));
+                        spawnPos.Add(new ItemPos(new Point(x, y), item));
                     }
                 }
             }

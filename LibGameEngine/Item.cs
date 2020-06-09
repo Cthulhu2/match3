@@ -49,11 +49,11 @@ namespace GameEngine
                 case ItemShape.Cube:
                     return "[" + Color + "]";
                 case ItemShape.Bomb:
-                    return "/B/";
+                    return "B" + Color + "B";
                 case ItemShape.HLine:
-                    return "---";
+                    return "-" + Color + "-";
                 case ItemShape.VLine:
-                    return " I ";
+                    return "|" + Color + "|";
                 default:
                     return "nil";
             }

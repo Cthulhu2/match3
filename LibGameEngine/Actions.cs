@@ -17,8 +17,8 @@ namespace GameEngine
 
     public class DestroyAction : IAction
     {
-        public Point[] RegularDestroyedPos { get; set; }
-        public SpawnPos[] SpawnBonuses { get; set; }
+        public ItemPos[] RegularDestroyedPos { get; set; }
+        public ItemPos[] SpawnBonuses { get; set; }
         public Point[] BombDestroyedPos { get; set; }
         public Point[] LineDestroyedPos { get; set; }
     }
@@ -61,12 +61,12 @@ namespace GameEngine
         public FallDownPos[] Positions { get; set; }
     }
 
-    public class SpawnPos
+    public class ItemPos
     {
         public Point Pos { get; }
         public Item Item { get; }
 
-        public SpawnPos(Point pos, Item item)
+        public ItemPos(Point pos, Item item)
         {
             Pos = pos;
             Item = item;
@@ -75,6 +75,6 @@ namespace GameEngine
     
     public class SpawnAction : IAction
     {
-        public SpawnPos[] Positions { get; set; }
+        public ItemPos[] Positions { get; set; }
     }
 }

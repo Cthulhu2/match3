@@ -26,8 +26,9 @@ public class SpawnAct : Object
 
     private async Task Exec()
     {
-        foreach (SpawnPos spPos in _act.Positions)
+        foreach (ItemPos spPos in _act.Positions)
         {
+            GD.Print($"SpawnAct. {spPos.Pos}, {spPos.Item.Dump()}");
             Sprite itemSprite =
                 _scene.SpawnSprite(spPos.Pos.X, spPos.Pos.Y, spPos.Item);
             itemSprite.Scale = new Vector2(5, 0);
@@ -37,9 +38,6 @@ public class SpawnAct : Object
 
         _tween.Start();
         await ToSignal(_tween, "tween_all_completed");
-        //_tween.RemoveAll();
-        
-        await Task.CompletedTask;
     }
     
     // ReSharper disable once SuggestBaseTypeForParameter
