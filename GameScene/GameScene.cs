@@ -133,6 +133,7 @@ public class GameScene : Node2D
                 break;
 
             case DestroyAction dAct:
+                GD.Print(dAct.Dump());
                 await DestroyAct.Exec(this, _itemSprites, dAct, _tween,
                     _bombTemplate);
                 break;
@@ -303,6 +304,14 @@ public class GameScene : Node2D
         ItemTable.AddChild(sprite);
 
         return sprite;
+    }
+
+    public void KillSprite(int x, int y)
+    {
+        Sprite sprite = _itemSprites[x, y];
+        _itemSprites[x, y] = null;
+        ItemTable.RemoveChild(sprite);
+        sprite.QueueFree();
     }
 
     public static Vector2 ToItemTablePos(int x, int y)

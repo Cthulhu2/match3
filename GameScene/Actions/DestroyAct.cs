@@ -1,8 +1,9 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GameEngine;
 using Godot;
+using Environment = System.Environment;
 
 // ReSharper disable ParameterTypeCanBeEnumerable.Local
 // ReSharper disable CheckNamespace
@@ -39,61 +40,40 @@ public class DestroyAct : Object
 
     private async Task Exec()
     {
-        foreach (ItemPos dPos in _act.RegularDestroyedPos)
-        {
-            Sprite item = _sprites[dPos.Pos.X, dPos.Pos.Y];
-            if (!dPos.Item.IsBombShape)
+        List<Task> destroyedBy = _act.MatchDestroyedPos
+            .Select(dPos =>
             {
-                RegularDestroyTween(item, 0);
-            }
-            else if (dPos.Item.IsBombShape)
-            {
-                Sprite[] bombNeighbour = _scene.Game.GetBombNeighbour(dPos.Pos)
-                    .Where(p => _act.BombDestroyedPos.Contains(p))
-                    .Select(p => _sprites[p.X, p.Y])
-                    .ToArray();
-                BombDestroy(dPos.Item.Color, item, bombNeighbour);
-            }
-        }
-
-        // TODO: Destroy dAct.LineDestroyedPos
+                GD.Print($"DestroyAct. byMatch {dPos.Pos} {dPos.Item.Dump()}");
+                return DestroyItem(dPos, 0);
+            })
+            .ToList();
+        
         _tween.Start();
         await ToSignal(_tween, "tween_all_completed");
         _tween.RemoveAll();
+        foreach (Task task in destroyedBy)
+        {
+            await task;
+        }
 
         _scene.UpdLblScores();
 
-        foreach (ItemPos dPos in _act.RegularDestroyedPos)
+        foreach (ItemPos dPos in _act.MatchDestroyedPos)
         {
-            Sprite sprite = _sprites[dPos.Pos.X, dPos.Pos.Y];
-            GD.Print($"DestroyAct.Exec. RemoveByMatch: {dPos.Pos},"
-                     + $" {sprite.Texture.ResourcePath}");
-            _sprites[dPos.Pos.X, dPos.Pos.Y] = null;
-            _scene.ItemTable.RemoveChild(sprite);
-            sprite.QueueFree();
+            _scene.KillSprite(dPos.Pos.X, dPos.Pos.Y);
         }
-        foreach (Point dPos in _act.BombDestroyedPos)
+
+        ItemPos[] dPositions = _act.DestroyedBy.Values
+            .SelectMany(p => p)
+            .ToArray();
+        foreach (ItemPos dPos in dPositions)
         {
-            Sprite sprite = _sprites[dPos.X, dPos.Y];
-            GD.Print($"DestroyAct.Exec. RemoveByBomb: {dPos}, "
-                     + $" {sprite.Texture.ResourcePath}");
-            _sprites[dPos.X, dPos.Y] = null;
-            _scene.ItemTable.RemoveChild(sprite);
-            sprite.QueueFree();
-        }
-        foreach (Point dPos in _act.LineDestroyedPos)
-        {
-            Sprite sprite = _sprites[dPos.X, dPos.Y];
-            GD.Print($"DestroyAct.Exec. RemoveByLine: {dPos}, "
-                     + $" {sprite.Texture.ResourcePath}");
-            _sprites[dPos.X, dPos.Y] = null;
-            _scene.ItemTable.RemoveChild(sprite);
-            sprite.QueueFree();
+            _scene.KillSprite(dPos.Pos.X, dPos.Pos.Y);
         }
 
         GD.Print("DestroyAct.Exec. Dump:");
         _scene.Game.Dump()
-            .Split(System.Environment.NewLine)
+            .Split(Environment.NewLine)
             .ToList()
             .ForEach(l => GD.Print(l));
 
@@ -111,6 +91,24 @@ public class DestroyAct : Object
             _tween.Start();
             await ToSignal(_tween, "tween_all_completed");
             _tween.RemoveAll();
+        }
+    }
+
+    private async Task DestroyItem(ItemPos dPos, float delay)
+    {
+        Sprite item = _sprites[dPos.Pos.X, dPos.Pos.Y];
+        if (dPos.Item.IsRegularShape)
+        {
+            RegularDestroyTween(item, delay);
+        }
+        else if (dPos.Item.IsBombShape)
+        {
+            await BombDestroy(dPos.Item.Color, item, _act.DestroyedBy[dPos]);
+        }
+        else if (dPos.Item.IsLineShape)
+        {
+            // TODO: Destroy dAct.LineDestroyedPos
+            RegularDestroyTween(item, 0);
         }
     }
 
@@ -137,9 +135,9 @@ public class DestroyAct : Object
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter
-    private async void BombDestroy(int color,
+    private async Task BombDestroy(int color,
                                    Sprite bomb,
-                                   Sprite[] destroyed)
+                                   ItemPos[] destroyedPos)
     {
         var bombExp = (KinematicBody2D) _bombTemplate.Duplicate();
         var player =
@@ -152,12 +150,35 @@ public class DestroyAct : Object
         bomb.Visible = false; // removed later in Exec
         bombExp.Visible = true;
 
-        foreach (Sprite sprite in destroyed)
+        List<Task> regularDestroyedBy = destroyedPos
+            .Where(p => p.Item.IsRegularShape)
+            .Select(dPos =>
+            {
+                GD.Print($"DestroyAct. byBomb {dPos.Pos} {dPos.Item.Dump()}");
+                return DestroyItem(dPos, 0.25f); // With delay
+            })
+            .ToList();
+        
+        await ToSignal(player, "animation_finished");
+
+        List<Task> bonusDestroyedBy = destroyedPos
+            .Where(p => !p.Item.IsRegularShape)
+            .Select(dPos =>
+            {
+                GD.Print($"DestroyAct. byBomb {dPos.Pos} {dPos.Item.Dump()}");
+                return DestroyItem(dPos, 0);
+            })
+            .ToList();
+        
+        foreach (Task regular in regularDestroyedBy)
         {
-            RegularDestroyTween(sprite, 0.25f);
+            await regular;
+        }
+        foreach (Task bonus in bonusDestroyedBy)
+        {
+            await bonus;
         }
 
-        await ToSignal(player, "animation_finished");
         bombExp.GetParent().RemoveChild(bombExp);
         bombExp.QueueFree();
     }

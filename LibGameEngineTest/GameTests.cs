@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using NUnit.Framework;
 
 // ReSharper disable CheckNamespace
@@ -18,6 +19,11 @@ namespace GameEngine
         private static Item Cube(int color)
         {
             return new Item(color, ItemShape.Cube);
+        }
+        
+        private static Item Bomb(int color)
+        {
+            return new Item(color, ItemShape.Bomb);
         }
 
         private static Item[,] CreateBoard(int w, int h, Item[] items)
@@ -114,8 +120,8 @@ namespace GameEngine
                 new Point(2, 0),
                 new Point(3, 0),
             };
-            Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
-            foreach (ItemPos dPos in dAct.RegularDestroyedPos)
+            Assert.AreEqual(destroyed.Count, dAct.MatchDestroyedPos.Length);
+            foreach (ItemPos dPos in dAct.MatchDestroyedPos)
             {
                 Assert.True(destroyed.Contains(dPos.Pos));
             }
@@ -146,8 +152,8 @@ namespace GameEngine
                 new Point(2, 3),
                 new Point(3, 3),
             };
-            Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
-            foreach (ItemPos dPos in dAct.RegularDestroyedPos)
+            Assert.AreEqual(destroyed.Count, dAct.MatchDestroyedPos.Length);
+            foreach (ItemPos dPos in dAct.MatchDestroyedPos)
             {
                 Assert.True(destroyed.Contains(dPos.Pos));
             }
@@ -178,8 +184,8 @@ namespace GameEngine
                 new Point(0, 1),
                 new Point(0, 2),
             };
-            Assert.AreEqual(destroyed.Count, dAct.RegularDestroyedPos.Length);
-            foreach (ItemPos dPos in dAct.RegularDestroyedPos)
+            Assert.AreEqual(destroyed.Count, dAct.MatchDestroyedPos.Length);
+            foreach (ItemPos dPos in dAct.MatchDestroyedPos)
             {
                 Assert.True(destroyed.Contains(dPos.Pos));
             }
@@ -308,6 +314,56 @@ namespace GameEngine
             var bomb = new Point(2, 2);
             Assert.AreEqual(bomb, dAct.SpawnBonuses[0].Pos);
             Assert.True(dAct.SpawnBonuses[0].Item.IsBombShape);
+        }
+        
+        [Test]
+        public void ChainedExplosions()
+        {
+            Item[,] items = CreateBoard(4, 3, new[]
+            {
+                // 0        1        2        3
+                Cube(1), Cube(1), Cube(3), Cube(1), // 0
+                Cube(1), Cube(1), Bomb(2), Cube(1), // 1
+                Ball(1), Ball(1), Cube(3), Bomb(1), // 2
+            });
+
+            var game = new Game(new Board(items));
+            // 
+            IAction[] actions = game.Swap(new Point(2, 2), new Point(3, 2));
+            //
+            Console.Out.WriteLine(game.Dump());
+            var dAct = (DestroyAction) actions[1];
+            var matchBomb = new Point(2, 2);
+            var chainBomb = new Point(2, 1);
+            //
+            Assert.False(dAct.MatchDestroyedPos.Any(p => p.Pos == chainBomb));
+            Assert.AreEqual(3, dAct.MatchDestroyedPos.Length);
+            Assert.True(dAct.MatchDestroyedPos.Any(p => p.Pos == new Point(0, 2)));
+            Assert.True(dAct.MatchDestroyedPos.Any(p => p.Pos == new Point(1, 2)));
+            Assert.True(dAct.MatchDestroyedPos.Any(p => p.Pos == matchBomb));
+            
+            Assert.True(dAct.DestroyedBy.Keys.Any(p => p.Pos == matchBomb));
+            Assert.True(dAct.DestroyedBy.Keys.Any(p => p.Pos == chainBomb));
+            // Chain bomb explosion
+            ItemPos matchBombPos = dAct.DestroyedBy
+                .Keys
+                .First(p => p.Pos == matchBomb);
+            ItemPos chainBombPos = dAct.DestroyedBy
+                .Keys
+                .First(p => p.Pos == chainBomb);
+            ItemPos[] byMatchBombPos = dAct.DestroyedBy[matchBombPos];
+            ItemPos[] byChainBombPos = dAct.DestroyedBy[chainBombPos];
+            //
+            Assert.AreEqual(4, byMatchBombPos.Length);
+            Assert.True(byMatchBombPos.Any(p => p.Pos == new Point(1, 1)));
+            Assert.True(byMatchBombPos.Any(p => p.Pos == new Point(2, 1)));
+            Assert.True(byMatchBombPos.Any(p => p.Pos == new Point(3, 1)));
+            Assert.True(byMatchBombPos.Any(p => p.Pos == new Point(3, 2)));
+            
+            Assert.AreEqual(3, byChainBombPos.Length);
+            Assert.True(byChainBombPos.Any(p => p.Pos == new Point(1, 0)));
+            Assert.True(byChainBombPos.Any(p => p.Pos == new Point(2, 0)));
+            Assert.True(byChainBombPos.Any(p => p.Pos == new Point(3, 0)));
         }
     }
 }

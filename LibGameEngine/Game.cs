@@ -232,6 +232,43 @@ namespace GameEngine
             return new ItemPos(targetPos, new Item(color, ItemShape.Bomb));
         }
 
+        private void CollectBonusDestroy(
+            ItemPos item,
+            Dictionary<ItemPos, ItemPos[]> destroyedBy,
+            HashSet<Point> except)
+        {
+            var destroyed = new List<Point>();
+            if (item.Item.IsBombShape)
+            {
+                destroyed = GetBombNeighbour(item.Pos)
+                    .Except(except)
+                    .ToList();
+            }
+            else if (item.Item.IsLineShape)
+            {
+                destroyed = GetLine(item.Pos, item.Item.Shape)
+                    .Except(except)
+                    .ToList();
+            }
+
+            // no more destroying for this
+            destroyed.ForEach(p => except.Add(p));
+
+            ItemPos[] destroyedPositions = destroyed
+                .Select(p => new ItemPos(p, Items[p.X, p.Y]))
+                .ToArray();
+
+            destroyedBy[item] = destroyedPositions;
+            // Recursively bonus destroyed
+            foreach (ItemPos pos in destroyedPositions)
+            {
+                if (!pos.Item.IsRegularShape)
+                {
+                    CollectBonusDestroy(pos, destroyedBy, except);
+                }
+            }
+        }
+
         // ReSharper disable once ReturnTypeCanBeEnumerable.Local
         private List<IAction> ProcessMatch(Point src, Point dest, MatchRes match)
         {
@@ -245,7 +282,7 @@ namespace GameEngine
                 regularDestroy.UnionWith(line1);
                 regularDestroy.UnionWith(line2);
             });
-            ItemPos[] regularDestroyItemPos = regularDestroy
+            ItemPos[] regularDestroyPos = regularDestroy
                 .Select(p => new ItemPos(p, Items[p.X, p.Y]))
                 .ToArray();
             //
@@ -267,53 +304,19 @@ namespace GameEngine
                 }
             });
 
-            var exploded = new HashSet<Point>();
-            Point[] byBombs = regularDestroy
-                .Where(p => Items[p.X, p.Y].IsBombShape)
-                .ToArray();
-            foreach (Point bomb in byBombs)
-            {
-                List<Point> bombNeighbours = GetBombNeighbour(bomb)
-                    .Except(regularDestroy)
-                    .ToList();
-                bombNeighbours.ForEach(p => exploded.Add(p));
-            }
-
-            var exterminated = new HashSet<Point>();
-            Point[] byLines = regularDestroy
-                .Where(p => Items[p.X, p.Y].IsLineShape)
-                .ToArray();
-            foreach (Point linePos in byLines)
-            {
-                Item it = Items[linePos.X, linePos.Y];
-                List<Point> line = GetLine(linePos, it.Shape)
-                    .Except(regularDestroy)
-                    .ToList();
-                line.ForEach(p => exterminated.Add(p));
-            }
-
-            // Update board
-            Point[] destroyed = new List<Point>()
-                .Union(regularDestroy)
-                .Union(exploded)
-                .Union(exterminated)
-                .ToArray();
-
-            foreach (Point m in destroyed)
-            {
-                Item item = Items[m.X, m.Y];
-                Scores += item.Score;
-                Items[m.X, m.Y] = null;
-            }
-
-            bonuses.ForEach(b => Items[b.Pos.X, b.Pos.Y] = b.Item);
+            var except = new HashSet<Point>(regularDestroy); // New modified set
+            var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
+            regularDestroyPos
+                .Where(p => !p.Item.IsRegularShape).ToList()
+                .ForEach(p => CollectBonusDestroy(p, destroyedBy, except));
+            //
+            UpdateBoardOnDestroy(regularDestroyPos, destroyedBy, bonuses);
             //
             actions.Add(new DestroyAction
             {
-                RegularDestroyedPos = regularDestroyItemPos,
+                MatchDestroyedPos = regularDestroyPos,
                 SpawnBonuses = bonuses.ToArray(),
-                BombDestroyedPos = exploded.ToArray(),
-                LineDestroyedPos = exterminated.ToArray(),
+                DestroyedBy = destroyedBy,
             });
 
             FallDownPos[] fallen = _board.CalcFallDownPositions()
@@ -326,6 +329,27 @@ namespace GameEngine
             return actions;
         }
 
+        private void UpdateBoardOnDestroy(
+            ItemPos[] regularDestroyItemPos,
+            Dictionary<ItemPos, ItemPos[]> destroyedBy,
+            List<ItemPos> bonuses)
+        {
+            var allDestroyed = new List<ItemPos>(regularDestroyItemPos);
+            foreach (ItemPos[] dBy in destroyedBy.Values)
+            {
+                allDestroyed.AddRange(dBy);
+            }
+
+            foreach (ItemPos m in allDestroyed)
+            {
+                Item item = Items[m.Pos.X, m.Pos.Y];
+                Scores += item.Score;
+                Items[m.Pos.X, m.Pos.Y] = null;
+            }
+
+            bonuses.ForEach(b => Items[b.Pos.X, b.Pos.Y] = b.Item);
+        }
+
         public IAction[] CheatBomb()
         {
             var rnd = new Random();
@@ -333,17 +357,29 @@ namespace GameEngine
             int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
             int x = rnd.Next(BoardWidth - 3);
             int y = rnd.Next(BoardHeight);
+            // Needs for correct destroying old bombs
+            var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
+            var oldBombs = new List<ItemPos>();
+            for (int i = 0; i < 3; i++)
+            {
+                Item item = Items[x + i, y];
+                if (item.IsBombShape)
+                {
+                    oldBombs.Add(new ItemPos(new Point(x + i, y), item));
+                }
+            }
+            oldBombs.ForEach(b => destroyedBy[b] = new ItemPos[0]);
+            //
             var dAct = new DestroyAction
             {
-                RegularDestroyedPos = new[]
+                MatchDestroyedPos = new[]
                 {
                     new ItemPos(new Point(x, y), Items[x, y]),
                     new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
                     new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
                 },
                 SpawnBonuses = new ItemPos[0],
-                BombDestroyedPos = new Point[0],
-                LineDestroyedPos = new Point[0],
+                DestroyedBy = destroyedBy,
             };
 
             Items[x, y] = new Item(color, shape);
