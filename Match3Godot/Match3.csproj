@@ -72,23 +72,51 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
-    <Content Include="GameScene\Ball.png" />
-    <Content Include="GameScene\Ball_Blue.png" />
-    <Content Include="GameScene\Ball_Green.png" />
-    <Content Include="GameScene\Ball_Grey.png" />
-    <Content Include="GameScene\Bomb_Blue.png" />
-    <Content Include="GameScene\Bomb_Green.png" />
-    <Content Include="GameScene\Bomb_Grey.png" />
-    <Content Include="GameScene\Cube_Blue.png" />
-    <Content Include="GameScene\Cube_Green.png" />
-    <Content Include="GameScene\Destroyer.png" />
-    <Content Include="GameScene\HLine_Blue.png" />
-    <Content Include="GameScene\HLine_Green.png" />
-    <Content Include="GameScene\HLine_Grey.png" />
-    <Content Include="GameScene\ItemTable.png" />
+    <Content Include="GameScene\Art\Ball_Blue.png" />
+    <Content Include="GameScene\Art\Ball_Blue.png.import" />
+    <Content Include="GameScene\Art\Ball_Green.png" />
+    <Content Include="GameScene\Art\Ball_Green.png.import" />
+    <Content Include="GameScene\Art\Ball_Grey.png" />
+    <Content Include="GameScene\Art\Ball_Grey.png.import" />
+    <Content Include="GameScene\Art\Bomb_Blue.png" />
+    <Content Include="GameScene\Art\Bomb_Blue.png.import" />
+    <Content Include="GameScene\Art\Bomb_Blue_Fire_1.png" />
+    <Content Include="GameScene\Art\Bomb_Blue_Fire_1.png.import" />
+    <Content Include="GameScene\Art\Bomb_Blue_Fire_2.png" />
+    <Content Include="GameScene\Art\Bomb_Blue_Fire_2.png.import" />
+    <Content Include="GameScene\Art\Bomb_Exploded.png" />
+    <Content Include="GameScene\Art\Bomb_Exploded.png.import" />
+    <Content Include="GameScene\Art\Bomb_Green.png" />
+    <Content Include="GameScene\Art\Bomb_Green.png.import" />
+    <Content Include="GameScene\Art\Bomb_Green_Fire_1.png" />
+    <Content Include="GameScene\Art\Bomb_Green_Fire_1.png.import" />
+    <Content Include="GameScene\Art\Bomb_Green_Fire_2.png" />
+    <Content Include="GameScene\Art\Bomb_Green_Fire_2.png.import" />
+    <Content Include="GameScene\Art\Bomb_Grey.png" />
+    <Content Include="GameScene\Art\Bomb_Grey.png.import" />
+    <Content Include="GameScene\Art\Bomb_Grey_Fire_1.png" />
+    <Content Include="GameScene\Art\Bomb_Grey_Fire_1.png.import" />
+    <Content Include="GameScene\Art\Bomb_Grey_Fire_2.png" />
+    <Content Include="GameScene\Art\Bomb_Grey_Fire_2.png.import" />
+    <Content Include="GameScene\Art\Cube_Blue.png" />
+    <Content Include="GameScene\Art\Cube_Blue.png.import" />
+    <Content Include="GameScene\Art\Cube_Green.png" />
+    <Content Include="GameScene\Art\Cube_Green.png.import" />
+    <Content Include="GameScene\Art\Destroyer.png" />
+    <Content Include="GameScene\Art\Destroyer.png.import" />
+    <Content Include="GameScene\Art\Destroyer_Fire.png" />
+    <Content Include="GameScene\Art\Destroyer_Fire.png.import" />
+    <Content Include="GameScene\Art\HLine_Blue.png" />
+    <Content Include="GameScene\Art\HLine_Blue.png.import" />
+    <Content Include="GameScene\Art\HLine_Green.png" />
+    <Content Include="GameScene\Art\HLine_Green.png.import" />
+    <Content Include="GameScene\Art\HLine_Grey.png" />
+    <Content Include="GameScene\Art\HLine_Grey.png.import" />
+    <Content Include="GameScene\Art\ItemTable.png" />
+    <Content Include="GameScene\Art\ItemTable.png.import" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="LibGameEngine\LibGameEngine.csproj">
+    <ProjectReference Include="..\LibGameEngine\LibGameEngine.csproj">
       <Project>{f58f416a-3795-49bd-b946-5a000730a5c1}</Project>
       <Name>LibGameEngine</Name>
     </ProjectReference>

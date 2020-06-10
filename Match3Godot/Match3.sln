@@ -2,9 +2,9 @@
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Match3", "Match3.csproj", "{199EF3C8-C44B-4A61-9515-1F4AA94C5875}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGameEngine", "LibGameEngine\LibGameEngine.csproj", "{F58F416A-3795-49BD-B946-5A000730A5C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGameEngine", "..\LibGameEngine\LibGameEngine.csproj", "{F58F416A-3795-49BD-B946-5A000730A5C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGameEngineTest", "LibGameEngineTest\LibGameEngineTest.csproj", "{48A6ACAA-27F1-4099-96FC-D84E0D33A2E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGameEngineTest", "..\LibGameEngineTest\LibGameEngineTest.csproj", "{48A6ACAA-27F1-4099-96FC-D84E0D33A2E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
