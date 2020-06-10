@@ -398,9 +398,100 @@ namespace GameEngine
             return new IAction[] {dAct, spAct};
         }
 
-        public IAction[] CheatLine()
+        public IAction[] CheatHLine()
         {
-            throw new NotImplementedException();
+            var rnd = new Random();
+            ItemShape shape = rnd.Next(2) > 0 ? ItemShape.Ball : ItemShape.Cube;
+            int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
+            int x = rnd.Next(BoardWidth - 3);
+            int y = rnd.Next(BoardHeight);
+            // Needs to avoid NullReferenceException while destroy old bonuses
+            var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
+            var oldBonuses = new List<ItemPos>();
+            for (int i = 0; i < 3; i++)
+            {
+                Item item = Items[x + i, y];
+                if (item.IsBombShape || item.IsLineShape)
+                {
+                    oldBonuses.Add(new ItemPos(new Point(x + i, y), item));
+                }
+            }
+            oldBonuses.ForEach(b => destroyedBy[b] = new ItemPos[0]);
+            //
+            var dAct = new DestroyAction
+            {
+                MatchDestroyedPos = new[]
+                {
+                    new ItemPos(new Point(x, y), Items[x, y]),
+                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
+                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
+                },
+                SpawnBonuses = new ItemPos[0],
+                DestroyedBy = destroyedBy,
+            };
+
+            Items[x, y] = new Item(color, shape);
+            Items[x + 1, y] = new Item(color, ItemShape.HLine);
+            Items[x + 2, y] = new Item(color, shape);
+
+            var spAct = new SpawnAction
+            {
+                Positions = new[]
+                {
+                    new ItemPos(new Point(x, y), Items[x, y]),
+                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
+                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
+                }
+            };
+            return new IAction[] {dAct, spAct};
+        }
+        
+        public IAction[] CheatVLine()
+        {
+            var rnd = new Random();
+            ItemShape shape = rnd.Next(2) > 0 ? ItemShape.Ball : ItemShape.Cube;
+            int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
+            int x = rnd.Next(BoardWidth);
+            int y = rnd.Next(BoardHeight - 3);
+            // Needs to avoid NullReferenceException while destroy old bonuses
+            var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
+            var oldBonuses = new List<ItemPos>();
+            for (int i = 0; i < 3; i++)
+            {
+                Item item = Items[x, y + i];
+                if (item.IsBombShape || item.IsLineShape)
+                {
+                    oldBonuses.Add(new ItemPos(new Point(x, y + i), item));
+                }
+            }
+            oldBonuses.ForEach(b => destroyedBy[b] = new ItemPos[0]);
+            //
+            var dAct = new DestroyAction
+            {
+                MatchDestroyedPos = new[]
+                {
+                    new ItemPos(new Point(x, y), Items[x, y]),
+                    new ItemPos(new Point(x, y + 1), Items[x, y + 1]),
+                    new ItemPos(new Point(x, y + 2), Items[x, y + 2]),
+                },
+                SpawnBonuses = new ItemPos[0],
+                DestroyedBy = destroyedBy,
+            };
+
+            Items[x, y] = new Item(color, shape);
+            Items[x, y + 1] = new Item(color, ItemShape.VLine);
+            Items[x, y + 2] = new Item(color, shape);
+
+            var spAct = new SpawnAction
+            {
+                Positions = new[]
+                {
+                    new ItemPos(new Point(x, y), Items[x, y]),
+                    new ItemPos(new Point(x, y + 1), Items[x, y + 1]),
+                    new ItemPos(new Point(x, y + 2), Items[x, y + 2]),
+                }
+            };
+            return new IAction[] {dAct, spAct};
         }
     }
 }

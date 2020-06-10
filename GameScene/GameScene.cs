@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GameEngine;
 using Godot;
+using Environment = System.Environment;
 
 // ReSharper disable ArrangeAccessorOwnerBody
 // ReSharper disable UnusedType.Global
@@ -23,12 +24,12 @@ public class GameScene : Node2D
     private Point _selSpritePoint = new Point(-1, -1);
 
     private Tween _tween;
-    public TextureRect ItemTable { get; private set; }
+    public TextureRect ItemTable { get; set; }
 
     private Label _lblScores;
     private Label _lblTime;
-    private Sprite[,] _itemSprites;
-    private KinematicBody2D _bombTemplate;
+    public Sprite[,] ItemSprites { get; private set; }
+    private Node2D _animTemplate;
 
     private Queue<IAction> _actions;
     private bool _inProcess;
@@ -38,7 +39,7 @@ public class GameScene : Node2D
     {
         Game = new Game(new Board());
         Game.Reset();
-        _itemSprites = new Sprite[Game.BoardWidth, Game.BoardHeight];
+        ItemSprites = new Sprite[Game.BoardWidth, Game.BoardHeight];
         _actions = new Queue<IAction>();
 
         _lblScores = GetNode<Label>(new NodePath("Canvas/LblScores"));
@@ -46,8 +47,7 @@ public class GameScene : Node2D
         ItemTable = GetNode<TextureRect>(new NodePath("Canvas/ItemTable"));
         _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
         _tween = GetNode<Tween>(new NodePath("Tween"));
-        _bombTemplate =
-            GetNode<KinematicBody2D>(new NodePath("Canvas/BombTemplate"));
+        _animTemplate = GetNode<Node2D>(new NodePath("Canvas/AnimTemplate"));
 
         _timer = GetNode<Timer>(new NodePath("GameTimer"));
         _timer.WaitTime = 1; // sec
@@ -89,7 +89,7 @@ public class GameScene : Node2D
 
     private void Select(int x, int y)
     {
-        _selSprite = _itemSprites[x, y];
+        _selSprite = ItemSprites[x, y];
         _selSpritePoint = new Point(x, y);
 
         _itemSelTween.Tween(_selSprite);
@@ -129,18 +129,18 @@ public class GameScene : Node2D
         switch (action)
         {
             case SwapAction swAct:
-                await SwapAct.Exec(_itemSprites, swAct, _tween);
+                await SwapAct.Exec(ItemSprites, swAct, _tween);
                 break;
 
             case DestroyAction dAct:
                 GD.Print(dAct.Dump());
-                await DestroyAct.Exec(this, _itemSprites, dAct, _tween,
-                    _bombTemplate);
+                await DestroyAct.Exec(this, ItemSprites, dAct, _tween,
+                    _animTemplate);
                 break;
 
             case FallDownAction fdAct:
             {
-                Task tFall = FallDownAct.Exec(_itemSprites, fdAct, _tween);
+                Task tFall = FallDownAct.Exec(ItemSprites, fdAct, _tween);
 
                 if (_actions.Peek() is SpawnAction)
                 {
@@ -174,19 +174,23 @@ public class GameScene : Node2D
 
     private void OnKeyEvent(InputEventKey evt)
     {
-        if (!_inProcess
-            && evt.IsPressed()
-            && evt.Alt)
+        GD.Print($"OnKeyEvent. evt: {evt.Scancode}");
+        if (_inProcess || !evt.IsPressed() || !evt.Alt)
         {
-            GD.Print($"OnKeyEvent. evt: {evt}");
-            if (evt.Scancode == (ulong) KeyList.Key1)
-            {
-                ProcessActions(Game.CheatBomb());
-            }
-            else if (evt.Scancode == (ulong) KeyList.Key2)
-            {
-                ProcessActions(Game.CheatLine());
-            }
+            return;
+        }
+
+        if (evt.Scancode == (ulong) KeyList.Key1)
+        {
+            ProcessActions(Game.CheatBomb());
+        }
+        else if (evt.Scancode == (ulong) KeyList.Key2)
+        {
+            ProcessActions(Game.CheatHLine());
+        }
+        else if (evt.Scancode == (ulong) KeyList.Key3)
+        {
+            ProcessActions(Game.CheatVLine());
         }
     }
 
@@ -202,7 +206,7 @@ public class GameScene : Node2D
         {
             for (int x = 0; x < Game.BoardWidth; x++)
             {
-                Sprite s = _itemSprites[x, y];
+                Sprite s = ItemSprites[x, y];
                 if (s != null && s.GetRect().HasPoint(s.ToLocal(evt.Position)))
                 {
                     OnSpriteClicked(x, y);
@@ -291,16 +295,16 @@ public class GameScene : Node2D
         sprite.Scale = new Vector2(5, 5);
         sprite.Position = ToItemTablePos(x, y);
 
-        if (_itemSprites[x, y] != null)
+        if (ItemSprites[x, y] != null)
         {
             GD.PrintErr($"Doubled Sprite!!! {x}:{y} {item}");
-            System.Environment.StackTrace
-                .Split(System.Environment.NewLine)
+            Environment.StackTrace
+                .Split(Environment.NewLine)
                 .ToList()
                 .ForEach(l => GD.PrintErr(l));
         }
 
-        _itemSprites[x, y] = sprite;
+        ItemSprites[x, y] = sprite;
         ItemTable.AddChild(sprite);
 
         return sprite;
@@ -308,8 +312,8 @@ public class GameScene : Node2D
 
     public void KillSprite(int x, int y)
     {
-        Sprite sprite = _itemSprites[x, y];
-        _itemSprites[x, y] = null;
+        Sprite sprite = ItemSprites[x, y];
+        ItemSprites[x, y] = null;
         ItemTable.RemoveChild(sprite);
         sprite.QueueFree();
     }
