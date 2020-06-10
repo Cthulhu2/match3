@@ -24,7 +24,7 @@ public class GameScene : Node2D
     private Point _selSpritePoint = new Point(-1, -1);
 
     private Tween _tween;
-    public TextureRect ItemTable { get; set; }
+    public TextureRect ItemTable { get; private set; }
 
     private Label _lblScores;
     private Label _lblTime;
@@ -162,13 +162,14 @@ public class GameScene : Node2D
 
     public override void _Input(InputEvent evt)
     {
-        if (evt is InputEventMouse)
+        switch (evt)
         {
-            OnMouseEvent((InputEventMouse) evt);
-        }
-        else if (evt is InputEventKey)
-        {
-            OnKeyEvent((InputEventKey) evt);
+            case InputEventMouse mEvt:
+                OnMouseEvent(mEvt);
+                break;
+            case InputEventKey kEvt:
+                OnKeyEvent(kEvt);
+                break;
         }
     }
 
@@ -182,15 +183,15 @@ public class GameScene : Node2D
 
         if (evt.Scancode == (ulong) KeyList.Key1)
         {
-            ProcessActions(Game.CheatBomb());
+            ProcessActions(Game.CheatBonus(ItemShape.Bomb));
         }
         else if (evt.Scancode == (ulong) KeyList.Key2)
         {
-            ProcessActions(Game.CheatHLine());
+            ProcessActions(Game.CheatBonus(ItemShape.HLine));
         }
         else if (evt.Scancode == (ulong) KeyList.Key3)
         {
-            ProcessActions(Game.CheatVLine());
+            ProcessActions(Game.CheatBonus(ItemShape.VLine));
         }
     }
 

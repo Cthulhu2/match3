@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 
 // ReSharper disable ArrangeAccessorOwnerBody
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -144,21 +145,20 @@ namespace GameEngine
             return pos.ToArray();
         }
 
+        // ReSharper disable once ReturnTypeCanBeEnumerable.Global
         public Point[] GetBombNeighbour(Point bombPos)
         {
-            var pos = new List<Point>();
-
-            pos.Add(new Point(bombPos.X - 1, bombPos.Y - 1));
-            pos.Add(new Point(bombPos.X, bombPos.Y - 1));
-            pos.Add(new Point(bombPos.X + 1, bombPos.Y - 1));
-
-            pos.Add(new Point(bombPos.X - 1, bombPos.Y));
-            pos.Add(new Point(bombPos.X + 1, bombPos.Y));
-
-            pos.Add(new Point(bombPos.X - 1, bombPos.Y + 1));
-            pos.Add(new Point(bombPos.X, bombPos.Y + 1));
-            pos.Add(new Point(bombPos.X + 1, bombPos.Y + 1));
-
+            var pos = new List<Point>
+            {
+                new Point(bombPos.X - 1, bombPos.Y - 1),
+                new Point(bombPos.X, bombPos.Y - 1),
+                new Point(bombPos.X + 1, bombPos.Y - 1),
+                new Point(bombPos.X - 1, bombPos.Y),
+                new Point(bombPos.X + 1, bombPos.Y),
+                new Point(bombPos.X - 1, bombPos.Y + 1),
+                new Point(bombPos.X, bombPos.Y + 1),
+                new Point(bombPos.X + 1, bombPos.Y + 1)
+            };
             pos.RemoveAll(p => (p.X < 0 || BoardWidth <= p.X)
                                || (p.Y < 0 || BoardHeight <= p.Y));
 
@@ -350,146 +350,62 @@ namespace GameEngine
             bonuses.ForEach(b => Items[b.Pos.X, b.Pos.Y] = b.Item);
         }
 
-        public IAction[] CheatBomb()
+        private static Point[] PointsFrom(int x, int y, bool vertical, int size)
         {
-            var rnd = new Random();
-            ItemShape shape = rnd.Next(2) > 0 ? ItemShape.Ball : ItemShape.Cube;
-            int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
-            int x = rnd.Next(BoardWidth - 3);
-            int y = rnd.Next(BoardHeight);
-            // Needs for correct destroying old bombs
-            var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
-            var oldBombs = new List<ItemPos>();
-            for (int i = 0; i < 3; i++)
+            var points = new Point[size];
+            for (int i = 0; i < size; i++)
             {
-                Item item = Items[x + i, y];
-                if (item.IsBombShape)
-                {
-                    oldBombs.Add(new ItemPos(new Point(x + i, y), item));
-                }
+                points[i] = vertical
+                    ? new Point(x, y + i)
+                    : new Point(x + i, y);
             }
-            oldBombs.ForEach(b => destroyedBy[b] = new ItemPos[0]);
-            //
-            var dAct = new DestroyAction
-            {
-                MatchDestroyedPos = new[]
-                {
-                    new ItemPos(new Point(x, y), Items[x, y]),
-                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
-                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
-                },
-                SpawnBonuses = new ItemPos[0],
-                DestroyedBy = destroyedBy,
-            };
 
-            Items[x, y] = new Item(color, shape);
-            Items[x + 1, y] = new Item(color, ItemShape.Bomb);
-            Items[x + 2, y] = new Item(color, shape);
-
-            var spAct = new SpawnAction
-            {
-                Positions = new[]
-                {
-                    new ItemPos(new Point(x, y), Items[x, y]),
-                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
-                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
-                }
-            };
-            return new IAction[] {dAct, spAct};
+            return points;
         }
 
-        public IAction[] CheatHLine()
+        public IAction[] CheatBonus(ItemShape bonus)
         {
             var rnd = new Random();
-            ItemShape shape = rnd.Next(2) > 0 ? ItemShape.Ball : ItemShape.Cube;
+            
+            bool vertical = rnd.Next(2) > 0;
+            ItemShape shape = rnd.Next(2) > 0
+                ? ItemShape.Ball
+                : ItemShape.Cube;
             int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
-            int x = rnd.Next(BoardWidth - 3);
-            int y = rnd.Next(BoardHeight);
+            int x = vertical
+                ? rnd.Next(BoardWidth)
+                : rnd.Next(BoardWidth - 3);
+            int y = vertical
+                ? rnd.Next(BoardHeight - 3)
+                : rnd.Next(BoardHeight);
+            
+            Point[] place = PointsFrom(x, y, vertical, 3);
             // Needs to avoid NullReferenceException while destroy old bonuses
             var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
-            var oldBonuses = new List<ItemPos>();
-            for (int i = 0; i < 3; i++)
-            {
-                Item item = Items[x + i, y];
-                if (item.IsBombShape || item.IsLineShape)
-                {
-                    oldBonuses.Add(new ItemPos(new Point(x + i, y), item));
-                }
-            }
+            List<ItemPos> oldBonuses = place
+                .Select(p => new ItemPos(p, Items[p.X, p.Y]))
+                .Where(ip => ip.Item.IsBombShape || ip.Item.IsLineShape)
+                .ToList();
             oldBonuses.ForEach(b => destroyedBy[b] = new ItemPos[0]);
             //
             var dAct = new DestroyAction
             {
-                MatchDestroyedPos = new[]
-                {
-                    new ItemPos(new Point(x, y), Items[x, y]),
-                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
-                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
-                },
+                MatchDestroyedPos = place
+                    .Select(p => new ItemPos(p, Items[p.X, p.Y]))
+                    .ToArray(),
                 SpawnBonuses = new ItemPos[0],
                 DestroyedBy = destroyedBy,
             };
 
-            Items[x, y] = new Item(color, shape);
-            Items[x + 1, y] = new Item(color, ItemShape.HLine);
-            Items[x + 2, y] = new Item(color, shape);
+            Items[place[0].X, place[0].Y] = new Item(color, shape);
+            Items[place[1].X, place[1].Y] = new Item(color, bonus);
+            Items[place[2].X, place[2].Y] = new Item(color, shape);
 
             var spAct = new SpawnAction
             {
-                Positions = new[]
-                {
-                    new ItemPos(new Point(x, y), Items[x, y]),
-                    new ItemPos(new Point(x + 1, y), Items[x + 1, y]),
-                    new ItemPos(new Point(x + 2, y), Items[x + 2, y]),
-                }
-            };
-            return new IAction[] {dAct, spAct};
-        }
-        
-        public IAction[] CheatVLine()
-        {
-            var rnd = new Random();
-            ItemShape shape = rnd.Next(2) > 0 ? ItemShape.Ball : ItemShape.Cube;
-            int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;
-            int x = rnd.Next(BoardWidth);
-            int y = rnd.Next(BoardHeight - 3);
-            // Needs to avoid NullReferenceException while destroy old bonuses
-            var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();
-            var oldBonuses = new List<ItemPos>();
-            for (int i = 0; i < 3; i++)
-            {
-                Item item = Items[x, y + i];
-                if (item.IsBombShape || item.IsLineShape)
-                {
-                    oldBonuses.Add(new ItemPos(new Point(x, y + i), item));
-                }
-            }
-            oldBonuses.ForEach(b => destroyedBy[b] = new ItemPos[0]);
-            //
-            var dAct = new DestroyAction
-            {
-                MatchDestroyedPos = new[]
-                {
-                    new ItemPos(new Point(x, y), Items[x, y]),
-                    new ItemPos(new Point(x, y + 1), Items[x, y + 1]),
-                    new ItemPos(new Point(x, y + 2), Items[x, y + 2]),
-                },
-                SpawnBonuses = new ItemPos[0],
-                DestroyedBy = destroyedBy,
-            };
-
-            Items[x, y] = new Item(color, shape);
-            Items[x, y + 1] = new Item(color, ItemShape.VLine);
-            Items[x, y + 2] = new Item(color, shape);
-
-            var spAct = new SpawnAction
-            {
-                Positions = new[]
-                {
-                    new ItemPos(new Point(x, y), Items[x, y]),
-                    new ItemPos(new Point(x, y + 1), Items[x, y + 1]),
-                    new ItemPos(new Point(x, y + 2), Items[x, y + 2]),
-                }
+                Positions = place
+                    .Select(p => new ItemPos(p, Items[p.X, p.Y]))
+                    .ToArray(),
             };
             return new IAction[] {dAct, spAct};
         }
