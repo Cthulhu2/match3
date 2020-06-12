@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Security.Cryptography;
 
 // ReSharper disable ArrangeAccessorOwnerBody
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -319,8 +318,7 @@ namespace GameEngine
                 DestroyedBy = destroyedBy,
             });
 
-            FallDownPos[] fallen = _board.CalcFallDownPositions()
-                .ToArray();
+            FallDownPos[] fallen = _board.CalcFallDownPositions().ToArray();
             actions.Add(new FallDownAction {Positions = fallen});
 
             ItemPos[] spawned = _board.SpawnItems().ToArray();
@@ -344,7 +342,7 @@ namespace GameEngine
             {
                 Item item = Items[m.Pos.X, m.Pos.Y];
                 Scores += item.Score;
-                Items[m.Pos.X, m.Pos.Y] = null;
+                _board.ClearItem(m.Pos);
             }
 
             bonuses.ForEach(b => Items[b.Pos.X, b.Pos.Y] = b.Item);

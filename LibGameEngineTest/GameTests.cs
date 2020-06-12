@@ -26,7 +26,7 @@ namespace GameEngine
             return new Item(color, ItemShape.Bomb);
         }
 
-        private static Item[,] CreateBoard(int w, int h, Item[] items)
+        private static Board CreateBoard(int w, int h, Item[] items)
         {
             var aItems = new Item[w, h];
 
@@ -43,7 +43,7 @@ namespace GameEngine
                 }
             }
 
-            return aItems;
+            return new Board(aItems);
         }
 
         [Test]
@@ -88,7 +88,6 @@ namespace GameEngine
             Assert.False(game.CanSwap(8, 0, 7, 0));
 
             Assert.False(game.CanSwap(0, 0, 1, 1));
-            Assert.False(game.CanSwap(0, 0, 1, 1));
 
             Assert.True(game.CanSwap(0, 0, 0, 1));
             Assert.True(game.CanSwap(0, 0, 1, 0));
@@ -97,7 +96,7 @@ namespace GameEngine
         [Test]
         public void Match3Horizontal()
         {
-            Item[,] items = CreateBoard(4, 4, new[]
+            Board board = CreateBoard(4, 4, new[]
             {
                 // 0        1        2        3
                 Ball(1), Ball(2), Ball(1), Ball(1), // 0
@@ -106,7 +105,7 @@ namespace GameEngine
                 Cube(9), Cube(1), Cube(2), Cube(3), // 3
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(0, 0), new Point(1, 0));
             //
@@ -130,7 +129,7 @@ namespace GameEngine
         [Test]
         public void Match3Horizontal2()
         {
-            Item[,] items = CreateBoard(4, 4, new[]
+            Board board = CreateBoard(4, 4, new[]
             {
                 // 0        1        2        3
                 Cube(1), Cube(2), Cube(3), Cube(4), // 0
@@ -139,7 +138,7 @@ namespace GameEngine
                 Ball(1), Ball(2), Ball(1), Ball(1), // 3
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(0, 3), new Point(1, 3));
             //
@@ -162,7 +161,7 @@ namespace GameEngine
         [Test]
         public void Match3Vertical()
         {
-            Item[,] items = CreateBoard(4, 4, new[]
+            Board board = CreateBoard(4, 4, new[]
             {
                 // 0        1        2        3
                 Ball(1), Cube(4), Cube(5), Cube(6), // 0
@@ -171,7 +170,7 @@ namespace GameEngine
                 Ball(1), Cube(7), Cube(8), Cube(9), // 3
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(0, 2), new Point(0, 3));
             //
@@ -194,14 +193,14 @@ namespace GameEngine
         [Test]
         public void FallDownAction()
         {
-            Item[,] items = CreateBoard(4, 2, new[]
+            Board board = CreateBoard(4, 2, new[]
             {
                 // 0        1        2        3
                 Cube(5), Cube(6), Cube(7), Cube(8), // 0
                 Ball(1), Ball(1), Ball(2), Ball(1), // 1
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(2, 1), new Point(3, 1));
             //
@@ -225,14 +224,14 @@ namespace GameEngine
         [Test]
         public void SpawnAction()
         {
-            Item[,] items = CreateBoard(4, 2, new[]
+            Board board = CreateBoard(4, 2, new[]
             {
                 // 0        1        2        3
                 Cube(3), Cube(3), Cube(1), Cube(3), // 0
                 Ball(1), Ball(1), Ball(2), Ball(1), // 1
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(2, 1), new Point(3, 1));
             //
@@ -257,14 +256,14 @@ namespace GameEngine
         [Test]
         public void SpawnBonusLine()
         {
-            Item[,] items = CreateBoard(4, 2, new[]
+            Board board = CreateBoard(4, 2, new[]
             {
                 // 0        1        2        3
                 Cube(3), Ball(1), Cube(3), Cube(3), // 0
                 Ball(1), Ball(2), Ball(1), Ball(1), // 1
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(1, 0), new Point(1, 1));
             //
@@ -277,14 +276,14 @@ namespace GameEngine
         [Test]
         public void SpawnBonusBombLine()
         {
-            Item[,] items = CreateBoard(5, 2, new[]
+            Board board = CreateBoard(5, 2, new[]
             {
                 // 0        1        2        3        4
                 Cube(3), Cube(3), Ball(1), Cube(3), Cube(3), // 0
                 Ball(1), Ball(1), Ball(2), Ball(1), Ball(1), // 1
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(2, 0), new Point(2, 1));
             //
@@ -297,7 +296,7 @@ namespace GameEngine
         [Test]
         public void SpawnBonusBombCross()
         {
-            Item[,] items = CreateBoard(4, 3, new[]
+            Board board = CreateBoard(4, 3, new[]
             {
                 // 0        1        2        3
                 Cube(1), Cube(1), Ball(1), Cube(1), // 0
@@ -305,7 +304,7 @@ namespace GameEngine
                 Ball(1), Ball(1), Ball(2), Ball(1), // 2
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             //
             IAction[] actions = game.Swap(new Point(2, 2), new Point(3, 2));
             //
@@ -319,7 +318,7 @@ namespace GameEngine
         [Test]
         public void ChainedExplosions()
         {
-            Item[,] items = CreateBoard(4, 3, new[]
+            Board board = CreateBoard(4, 3, new[]
             {
                 // 0        1        2        3
                 Cube(1), Cube(1), Cube(3), Cube(1), // 0
@@ -327,7 +326,7 @@ namespace GameEngine
                 Ball(1), Ball(1), Cube(3), Bomb(1), // 2
             });
 
-            var game = new Game(new Board(items));
+            var game = new Game(board);
             // 
             IAction[] actions = game.Swap(new Point(2, 2), new Point(3, 2));
             //

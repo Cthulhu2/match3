@@ -64,30 +64,45 @@ namespace GameEngine
             return new Item(template.Color, template.Shape, template.Score);
         }
 
+        public void ClearItem(Point pos)
+        {
+            Items[pos.X, pos.Y] = null;
+        }
+        
+        private void ClearItems(IEnumerable<Point> pos)
+        {
+            foreach (Point p in pos)
+            {
+                ClearItem(p);
+            }
+        }
+        
         public void Reset()
         {
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    Items[x, y] = null;
+                    ClearItem(new Point(x, y));
                 }
             }
 
             SpawnItems();
             // Remove all existed matches
-            List<Point> matches;
+            MatchRes matches;
             do
             {
-                matches = CalcMatchesInitial().ToList();
-                foreach (Point m in matches)
+                matches = CalcMatches();
+                matches.MatchLines.ForEach(ClearItems);
+                matches.MatchCrosses.ForEach(cross =>
                 {
-                    Items[m.X, m.Y] = null;
-                }
+                    (Point[] line1, Point[] line2) = cross;
+                    ClearItems(line1);
+                    ClearItems(line2);
+                });
 
-                CalcFallDownPositions();
                 SpawnItems();
-            } while (matches.Any());
+            } while (matches.MatchLines.Any() || matches.MatchCrosses.Any());
         }
 
         public List<ItemPos> SpawnItems()
@@ -215,46 +230,6 @@ namespace GameEngine
             return true;
         }
 
-        private List<Point> TestMatch3H(int x, int y)
-        {
-            Item type00 = Items[x, y];
-            Item type10 = Items[x + 1, y];
-            Item type20 = Items[x + 2, y];
-
-            var matches = new List<Point>();
-            if (Item.AreEquals(type00, type10, type20))
-            {
-                matches.AddRange(new[]
-                {
-                    new Point(x, y),
-                    new Point(x + 1, y),
-                    new Point(x + 2, y),
-                });
-            }
-
-            return matches;
-        }
-
-        private List<Point> TestMatch3V(int x, int y)
-        {
-            Item type00 = Items[x, y];
-            Item type01 = Items[x, y + 1];
-            Item type02 = Items[x, y + 2];
-
-            var matches = new List<Point>();
-            if (Item.AreEquals(type00, type01, type02))
-            {
-                matches.AddRange(new[]
-                {
-                    new Point(x, y),
-                    new Point(x, y + 1),
-                    new Point(x, y + 2),
-                });
-            }
-
-            return matches;
-        }
-
         private List<Point[]> FindMatchLines(int count)
         {
             // ReSharper disable once TooWideLocalVariableScope
@@ -330,37 +305,6 @@ namespace GameEngine
                 MatchLines = matchLines,
                 MatchCrosses = matchCross,
             };
-        }
-
-        public IEnumerable<Point> CalcMatchesInitial()
-        {
-            var matches = new HashSet<Point>();
-
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    if (x < Width - 2)
-                    {
-                        List<Point> match3 = TestMatch3H(x, y);
-                        if (match3.Count > 0)
-                        {
-                            match3.ForEach(p => matches.Add(p));
-                        }
-                    }
-
-                    if (y < Height - 2)
-                    {
-                        List<Point> match3 = TestMatch3V(x, y);
-                        if (match3.Count > 0)
-                        {
-                            match3.ForEach(p => matches.Add(p));
-                        }
-                    }
-                }
-            }
-
-            return matches;
         }
 
         private Point FindUpperFirst(int x, int y)
