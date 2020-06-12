@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://MainMenu/MainMenu.cs" type="Script" id=1]
+[ext_resource path="res://Font/PressStart2P.tres" type="DynamicFont" id=2]
+
+[sub_resource type="InputEventKey" id=4]
+scancode = 32
+
+[sub_resource type="ShortCut" id=3]
+shortcut = SubResource( 4 )
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 1 )
@@ -26,6 +33,12 @@ margin_right = 201.36
 margin_bottom = 51.3604
 grow_horizontal = 2
 grow_vertical = 2
+custom_fonts/font = ExtResource( 2 )
+custom_colors/font_color_disabled = Color( 0.572549, 0, 0, 1 )
+custom_colors/font_color = Color( 0.839216, 0, 0, 1 )
+custom_colors/font_color_hover = Color( 1, 0, 0, 1 )
+custom_colors/font_color_pressed = Color( 0.572549, 0, 0, 1 )
+shortcut = SubResource( 3 )
 text = "PLAY"
 __meta__ = {
 "_edit_use_anchors_": false

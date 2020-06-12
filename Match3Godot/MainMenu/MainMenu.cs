@@ -1,7 +1,6 @@
 using Godot;
 
 // ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
 // ReSharper disable CheckNamespace
 
 public class MainMenu : Node2D
@@ -12,7 +11,7 @@ public class MainMenu : Node2D
     public override void _Ready()
     {
         _btnPlay = GetNode<Button>("CanvasLayer/BtnPlay");
-        _btnPlay.Connect("pressed", this, "OnPlayPressed");
+        _btnPlay.Connect("pressed", this, nameof(OnPlayPressed));
     }
 
 //  // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -21,7 +20,7 @@ public class MainMenu : Node2D
 //      
 //  }
 
-    public void OnPlayPressed()
+    private void OnPlayPressed()
     {
         GetTree().ChangeScene("res://GameScene/GameScene.tscn");
     }

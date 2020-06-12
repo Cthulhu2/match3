@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://GameScene/GameScene.cs" type="Script" id=1]
 [ext_resource path="res://GameScene/Art/ItemTable.png" type="Texture" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://GameScene/Art/Bomb_Green_Fire_1.png" type="Texture" id=10]
 [ext_resource path="res://GameScene/Art/Destroyer_Fire.png" type="Texture" id=11]
 [ext_resource path="res://GameScene/Art/Destroyer.png" type="Texture" id=12]
+[ext_resource path="res://Font/PressStart2P.tres" type="DynamicFont" id=13]
 
 [sub_resource type="SpriteFrames" id=1]
 animations = [ {
@@ -151,22 +152,32 @@ __meta__ = {
 }
 
 [node name="LblScores" type="Label" parent="Canvas"]
+margin_left = 20.0
 margin_right = 512.0
 margin_bottom = 50.0
-text = "Scores: 00000000"
-align = 1
+custom_fonts/font = ExtResource( 13 )
+custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
+custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+text = "Scores:0"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="LblTime" type="Label" parent="Canvas"]
-anchor_left = 0.5
-anchor_right = 0.5
-margin_right = 512.0
-margin_bottom = 50.0
-text = "Time left: 0 seconds"
-align = 1
+anchor_left = 1.0
+anchor_top = 0.003
+anchor_right = 1.0
+anchor_bottom = 0.003
+margin_left = -512.0
+margin_top = 0.2
+margin_right = -20.0
+margin_bottom = 48.2
+custom_fonts/font = ExtResource( 13 )
+custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
+custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+text = "Time:60sec"
+align = 2
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false,

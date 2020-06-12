@@ -218,12 +218,12 @@ public class GameScene : Node2D
 
     private void UpdLblTime()
     {
-        _lblTime.Text = $"Time left: {Game.TimeLeftSec:D2} seconds";
+        _lblTime.Text = $"Time:{Game.TimeLeftSec:D2}sec";
     }
 
     public void UpdLblScores()
     {
-        _lblScores.Text = $"Scores: {Game.Scores:D10}";
+        _lblScores.Text = $"Scores:{Game.Scores:D}";
     }
 
     public void OnTimerTick()

@@ -17,4 +17,9 @@ Build lines from 3 or more elements and get scores!
   [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools) or the
   [Mono SDK](https://www.mono-project.com/download/stable/));
 * External Editor (MonoDevelop, Visual Studio Code, JetBrains Rider) 
-  
+
+Credits
+-------
+* Font "PressStart2P". Thanks very much to
+  [CodeMan38](https://github.com/codeman38) for the font. Also see
+  [SIL OPEN FONT LICENSE Version 1.1](https://github.com/Cthulhu2/match3/blob/master/Match3Godot/Font/OFL.txt)
