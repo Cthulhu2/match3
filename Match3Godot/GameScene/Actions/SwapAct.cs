@@ -26,9 +26,9 @@ public class SwapAct : Object
 
     private async Task Exec()
     {
-        bool isHorizontal = (_act.SrcPos.Y == _act.DestPos.Y);
-        Sprite srcSprite = _sprites[_act.SrcPos.X, _act.SrcPos.Y];
-        Sprite destSprite = _sprites[_act.DestPos.X, _act.DestPos.Y];
+        bool isHorizontal = (_act.Src.Pos.Y == _act.Dest.Pos.Y);
+        Sprite srcSprite = _sprites[_act.Src.Pos.X, _act.Src.Pos.Y];
+        Sprite destSprite = _sprites[_act.Dest.Pos.X, _act.Dest.Pos.Y];
         if (isHorizontal)
         {
             HMoveTween(srcSprite, destSprite.Position);
@@ -42,12 +42,10 @@ public class SwapAct : Object
 
         _tween.Start();
         await ToSignal(_tween, "tween_all_completed");
-        //_tween.RemoveAll();
+        _tween.RemoveAll();
 
-        _sprites[_act.DestPos.X, _act.DestPos.Y] = srcSprite;
-        _sprites[_act.SrcPos.X, _act.SrcPos.Y] = destSprite;
-
-        await Task.CompletedTask;
+        _sprites[_act.Dest.Pos.X, _act.Dest.Pos.Y] = srcSprite;
+        _sprites[_act.Src.Pos.X, _act.Src.Pos.Y] = destSprite;
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter

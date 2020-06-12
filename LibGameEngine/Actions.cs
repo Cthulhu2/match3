@@ -11,11 +11,8 @@ namespace GameEngine
 
     public class SwapAction : IAction
     {
-        public Point SrcPos { get; set; }
-        public Item SrcItem { get; set; }
-
-        public Point DestPos { get; set; }
-        public Item DestItem { get; set; }
+        public ItemPos Src { get; set; }
+        public ItemPos Dest { get; set; }
     }
 
     public class DestroyAction : IAction

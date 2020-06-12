@@ -59,13 +59,6 @@ namespace GameEngine
             }
         }
 
-        public static bool AreEquals(Item i1, Item i2, Item i3)
-        {
-            return i1 != null && i2 != null && i3 != null
-                   && i1.Shape == i2.Shape && i1.Color == i2.Color
-                   && i1.Shape == i3.Shape && i1.Color == i3.Color;
-        }
-
         private bool Equals(Item other)
         {
             return Color == other.Color

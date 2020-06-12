@@ -311,12 +311,15 @@ public class GameScene : Node2D
         return sprite;
     }
 
-    public void KillSprite(int x, int y)
+    public void KillSprites(IEnumerable<ItemPos> pos)
     {
-        Sprite sprite = ItemSprites[x, y];
-        ItemSprites[x, y] = null;
-        ItemTable.RemoveChild(sprite);
-        sprite.QueueFree();
+        foreach (ItemPos p in pos)
+        {
+            Sprite sprite = ItemSprites[p.Pos.X, p.Pos.Y];
+            ItemSprites[p.Pos.X, p.Pos.Y] = null;
+            ItemTable.RemoveChild(sprite);
+            sprite.QueueFree();
+        }
     }
 
     public static Vector2 ToItemTablePos(int x, int y)

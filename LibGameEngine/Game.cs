@@ -4,8 +4,6 @@ using System.Drawing;
 using System.Linq;
 
 // ReSharper disable ArrangeAccessorOwnerBody
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable MemberCanBePrivate.Global
 
 namespace GameEngine
 {
@@ -71,12 +69,14 @@ namespace GameEngine
         public bool CanSwap(int srcX, int srcY, int destX, int destY)
         {
             // Can swap horizontal/vertical neighbours only
+            // ReSharper disable ArrangeRedundantParentheses
             return (0 <= srcX && srcX < _board.Width)
                    && (0 <= destX && destX < _board.Width)
                    && (0 <= srcY && destY < _board.Height)
                    && (0 <= destY && destY < _board.Height)
                    && ((Math.Abs(srcX - destX) == 1 && srcY == destY)
                        || (Math.Abs(srcY - destY) == 1 && srcX == destX));
+            // ReSharper restore ArrangeRedundantParentheses
         }
 
         // ReSharper disable once ReturnTypeCanBeEnumerable.Global
@@ -86,10 +86,8 @@ namespace GameEngine
             {
                 new SwapAction
                 {
-                    SrcPos = src,
-                    SrcItem = Items[src.X, src.Y],
-                    DestPos = dest,
-                    DestItem = Items[dest.X, dest.Y],
+                    Src = new ItemPos(src, Items[src.X, src.Y]),
+                    Dest = new ItemPos(dest, Items[dest.X, dest.Y]),
                 }
             };
             _board.Swap(src, dest);
@@ -100,10 +98,8 @@ namespace GameEngine
             {
                 actions.Add(new SwapAction
                 {
-                    SrcPos = src,
-                    SrcItem = Items[src.X, src.Y],
-                    DestPos = dest,
-                    DestItem = Items[dest.X, dest.Y],
+                    Src = new ItemPos(src, Items[src.X, src.Y]),
+                    Dest = new ItemPos(dest, Items[dest.X, dest.Y]),
                 });
                 _board.Swap(src, dest); // swap back
             }
@@ -111,7 +107,7 @@ namespace GameEngine
             {
                 while (!match.IsEmpty)
                 {
-                    List<IAction> processed = ProcessMatch(src, dest, match);
+                    var processed = ProcessMatch(src, dest, match);
 
                     actions.AddRange(processed);
 
@@ -122,7 +118,7 @@ namespace GameEngine
             return actions.ToArray();
         }
 
-        private Point[] GetLine(Point linePos, ItemShape shape)
+        private IEnumerable<Point> GetLine(Point linePos, ItemShape shape)
         {
             var pos = new List<Point>();
 
@@ -141,11 +137,10 @@ namespace GameEngine
                 }
             }
 
-            return pos.ToArray();
+            return pos;
         }
 
-        // ReSharper disable once ReturnTypeCanBeEnumerable.Global
-        public Point[] GetBombNeighbour(Point bombPos)
+        private IEnumerable<Point> GetBombNeighbour(Point bombPos)
         {
             var pos = new List<Point>
             {
@@ -158,10 +153,11 @@ namespace GameEngine
                 new Point(bombPos.X, bombPos.Y + 1),
                 new Point(bombPos.X + 1, bombPos.Y + 1)
             };
+            // ReSharper disable ArrangeRedundantParentheses
             pos.RemoveAll(p => (p.X < 0 || BoardWidth <= p.X)
                                || (p.Y < 0 || BoardHeight <= p.Y));
-
-            return pos.ToArray();
+            // ReSharper restore ArrangeRedundantParentheses
+            return pos;
         }
 
         private static Point TargetBonusPos(Point src, Point dest, Point[] line)
@@ -233,8 +229,8 @@ namespace GameEngine
 
         private void CollectBonusDestroy(
             ItemPos item,
-            Dictionary<ItemPos, ItemPos[]> destroyedBy,
-            HashSet<Point> except)
+            IDictionary<ItemPos, ItemPos[]> destroyedBy,
+            ISet<Point> except)
         {
             var destroyed = new List<Point>();
             if (item.Item.IsBombShape)
@@ -250,8 +246,7 @@ namespace GameEngine
                     .ToList();
             }
 
-            // no more destroying for this
-            destroyed.ForEach(p => except.Add(p));
+            except.UnionWith(destroyed); // no more destroying for this
 
             ItemPos[] destroyedPositions = destroyed
                 .Select(p => new ItemPos(p, Items[p.X, p.Y]))
@@ -268,8 +263,9 @@ namespace GameEngine
             }
         }
 
-        // ReSharper disable once ReturnTypeCanBeEnumerable.Local
-        private List<IAction> ProcessMatch(Point src, Point dest, MatchRes match)
+        private IEnumerable<IAction> ProcessMatch(Point src,
+                                                  Point dest,
+                                                  MatchRes match)
         {
             var actions = new List<IAction>();
             //
@@ -328,7 +324,7 @@ namespace GameEngine
         }
 
         private void UpdateBoardOnDestroy(
-            ItemPos[] regularDestroyItemPos,
+            IEnumerable<ItemPos> regularDestroyItemPos,
             Dictionary<ItemPos, ItemPos[]> destroyedBy,
             List<ItemPos> bonuses)
         {
@@ -364,7 +360,7 @@ namespace GameEngine
         public IAction[] CheatBonus(ItemShape bonus)
         {
             var rnd = new Random();
-            
+
             bool vertical = rnd.Next(2) > 0;
             ItemShape shape = rnd.Next(2) > 0
                 ? ItemShape.Ball
@@ -376,7 +372,7 @@ namespace GameEngine
             int y = vertical
                 ? rnd.Next(BoardHeight - 3)
                 : rnd.Next(BoardHeight);
-            
+
             Point[] place = PointsFrom(x, y, vertical, 3);
             // Needs to avoid NullReferenceException while destroy old bonuses
             var destroyedBy = new Dictionary<ItemPos, ItemPos[]>();

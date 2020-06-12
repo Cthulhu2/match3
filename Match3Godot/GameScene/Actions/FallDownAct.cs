@@ -39,8 +39,6 @@ public class FallDownAct : Object
         _tween.Start();
         await ToSignal(_tween, "tween_all_completed");
         _tween.RemoveAll();
-
-        await Task.CompletedTask;
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter

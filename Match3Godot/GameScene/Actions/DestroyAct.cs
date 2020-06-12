@@ -68,18 +68,8 @@ public class DestroyAct : Object
 
         _scene.UpdLblScores();
 
-        foreach (ItemPos dPos in _act.MatchDestroyedPos)
-        {
-            _scene.KillSprite(dPos.Pos.X, dPos.Pos.Y);
-        }
-
-        ItemPos[] dPositions = _act.DestroyedBy.Values
-            .SelectMany(p => p)
-            .ToArray();
-        foreach (ItemPos dPos in dPositions)
-        {
-            _scene.KillSprite(dPos.Pos.X, dPos.Pos.Y);
-        }
+        _scene.KillSprites(_act.MatchDestroyedPos);
+        _scene.KillSprites(_act.DestroyedBy.Values.SelectMany(p => p));
 
         GD.Print("DestroyAct.Exec. Dump:");
         _scene.Game.Dump()
