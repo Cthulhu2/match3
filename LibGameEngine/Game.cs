@@ -107,7 +107,8 @@ namespace GameEngine
             {
                 while (!match.IsEmpty)
                 {
-                    var processed = ProcessMatch(src, dest, match);
+                    IEnumerable<IAction> processed =
+                        ProcessMatch(src, dest, match);
 
                     actions.AddRange(processed);
 

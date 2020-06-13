@@ -7,14 +7,14 @@ using GameEngine;
 using Godot;
 using Environment = System.Environment;
 
-// ReSharper disable ArrangeAccessorOwnerBody
 // ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
 // ReSharper disable CheckNamespace
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class GameScene : Node2D
 {
+    private const string RecordsFilePath = "user://records.dat";
+
     public Game Game { get; private set; }
 
     private Timer _timer;
@@ -26,7 +26,9 @@ public class GameScene : Node2D
     private Tween _tween;
     public TextureRect ItemTable { get; private set; }
 
+    private int _hiScores;
     private Label _lblScores;
+    private Label _lblHiScores;
     private Label _lblTime;
     public Sprite[,] ItemSprites { get; private set; }
     private Node2D _animTemplate;
@@ -43,6 +45,7 @@ public class GameScene : Node2D
         _actions = new Queue<IAction>();
 
         _lblScores = GetNode<Label>(new NodePath("Canvas/LblScores"));
+        _lblHiScores = GetNode<Label>(new NodePath("Canvas/LblHiScores"));
         _lblTime = GetNode<Label>(new NodePath("Canvas/LblTime"));
         ItemTable = GetNode<TextureRect>(new NodePath("Canvas/ItemTable"));
         _itemSelTween = GetNode<ItemSelTween>(new NodePath("ItemSelTween"));
@@ -51,12 +54,14 @@ public class GameScene : Node2D
 
         _timer = GetNode<Timer>(new NodePath("GameTimer"));
         _timer.WaitTime = 1; // sec
-        _timer.Connect("timeout", this, "OnTimerTick");
-        _timer.Start();
+        _timer.Connect("timeout", this, nameof(OnTimerTick));
 
+        LoadHiScores();
         UpdLblTime();
         UpdLblScores();
         SpawnSprites();
+        
+        _timer.Start();
     }
 
 //  // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -224,13 +229,53 @@ public class GameScene : Node2D
     public void UpdLblScores()
     {
         _lblScores.Text = $"Scores:{Game.Scores:D}";
+        if (Game.Scores > _hiScores)
+        {
+            _hiScores = Game.Scores;
+        }
+        _lblHiScores.Text = $"HiScores:{_hiScores:D}";
     }
 
-    public void OnTimerTick()
+    private void LoadHiScores()
+    {
+        var records = new File();
+        Error res = records.Open(RecordsFilePath, File.ModeFlags.Read);
+        if (res == Error.Ok)
+        {
+            _hiScores = (int) records.Get32();
+            GD.Print($"LoadHiScores. {_hiScores}");
+        }
+        else
+        {
+            _hiScores = 4280;
+            GD.PrintErr($"LoadHiScores. Err: {res}, File: {RecordsFilePath}");
+        }
+        records.Close();
+    }
+
+    private void SaveHiScores()
+    {
+        var records = new File();
+        Error res = records.Open(RecordsFilePath, File.ModeFlags.Write);
+        if (res == Error.Ok)
+        {
+            GD.Print($"SaveHiScores. {_hiScores}");
+            records.Store32((uint) _hiScores);
+        }
+        else
+        {
+            _hiScores = 4280;
+            GD.PrintErr($"SaveHiScores. Err: {res}, File: {RecordsFilePath}");
+        }
+        records.Close();
+    }
+    
+    private void OnTimerTick()
     {
         Game.Tick();
         if (Game.IsOver)
         {
+            SaveHiScores();
             GetTree().ChangeScene("res://GameOver/GameOver.tscn");
         }
         else

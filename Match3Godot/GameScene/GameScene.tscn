@@ -164,20 +164,36 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="LblTime" type="Label" parent="Canvas"]
+[node name="LblHiScores" type="Label" parent="Canvas"]
 anchor_left = 1.0
-anchor_top = 0.003
 anchor_right = 1.0
-anchor_bottom = 0.003
 margin_left = -512.0
-margin_top = 0.2
 margin_right = -20.0
-margin_bottom = 48.2
+margin_bottom = 50.0
+custom_fonts/font = ExtResource( 13 )
+custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
+custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+text = "HiScores:0"
+align = 2
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblTime" type="Label" parent="Canvas"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -512.0
+margin_top = -50.0
+margin_right = 512.0
+margin_bottom = -2.0
 custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
 custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
 text = "Time:60sec"
-align = 2
+align = 1
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false,

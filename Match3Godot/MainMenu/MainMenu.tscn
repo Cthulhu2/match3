@@ -3,11 +3,11 @@
 [ext_resource path="res://MainMenu/MainMenu.cs" type="Script" id=1]
 [ext_resource path="res://Font/PressStart2P.tres" type="DynamicFont" id=2]
 
-[sub_resource type="InputEventKey" id=4]
+[sub_resource type="InputEventKey" id=1]
 scancode = 32
 
-[sub_resource type="ShortCut" id=3]
-shortcut = SubResource( 4 )
+[sub_resource type="ShortCut" id=2]
+shortcut = SubResource( 1 )
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 1 )
@@ -38,7 +38,7 @@ custom_colors/font_color_disabled = Color( 0.572549, 0, 0, 1 )
 custom_colors/font_color = Color( 0.839216, 0, 0, 1 )
 custom_colors/font_color_hover = Color( 1, 0, 0, 1 )
 custom_colors/font_color_pressed = Color( 0.572549, 0, 0, 1 )
-shortcut = SubResource( 3 )
+shortcut = SubResource( 2 )
 text = "PLAY"
 __meta__ = {
 "_edit_use_anchors_": false
