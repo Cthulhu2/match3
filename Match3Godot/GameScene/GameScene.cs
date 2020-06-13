@@ -241,6 +241,14 @@ public class GameScene : Node2D
         UpdLblTime();
     }
 
+    public static readonly Dictionary<int, int> BombAnimFirstFrame =
+        new Dictionary<int, int>
+        {
+            {1, 3},
+            {2, 0},
+            {3, 6},
+        };
+
     public static readonly Dictionary<int, string> Colors =
         new Dictionary<int, string>
         {

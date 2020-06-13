@@ -143,11 +143,14 @@ public class DestroyAct : Object
             bombExp.GetNode<AnimationPlayer>(new NodePath("AnimationPlayer"));
         bomb.GetParent().AddChild(bombExp);
         bombExp.Position = bomb.Position;
+        var sprite =
+            bombExp.GetNode<AnimatedSprite>(new NodePath("AnimatedSprite"));
+        sprite.Frame = GameScene.BombAnimFirstFrame[color];
         string animName = $"Bomb_{GameScene.Colors[color]}_Explosion";
         player.GetAnimation(animName).Loop = false; // Sometimes it's true(???)
         player.Play(animName);
-        bomb.Visible = false; // removed later in Exec
         bombExp.Visible = true;
+        bomb.Visible = false; // removed later in Exec
 
         List<Task> regularDestroyedBy = destroyedPos
             .Where(p => p.Item.IsRegularShape)
@@ -322,7 +325,9 @@ public class Destroyer : Sprite
             _body.GetNode<AnimationPlayer>(new NodePath("AnimationPlayer"));
         _player.CurrentAnimation = FireAnim;
         _player.GetAnimation(FireAnim).Loop = false; // Sometimes it's true(???)
-        _player.Stop();
+        var sprite =
+            _body.GetNode<AnimatedSprite>(new NodePath("AnimatedSprite"));
+        sprite.Frame = 9;
         AddChild(_body);
         _body.Position = new Vector2(0, 0);
         _body.Visible = true;
