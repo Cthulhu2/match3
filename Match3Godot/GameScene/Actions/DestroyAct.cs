@@ -307,14 +307,16 @@ public class Destroyer : Sprite
 
     private const string FireAnim = "Destroyer_Fire";
 
-    private readonly List<Sprite> _destroyed;
+    private readonly IDictionary<Sprite, Rect2> _destroyed;
     private readonly Node2D _body;
 
     private AnimationPlayer _player;
 
     public Destroyer(Sprite[] destroyed, Node2D body)
     {
-        _destroyed = destroyed.ToList();
+        _destroyed = destroyed.ToDictionary(
+            s => s,
+            s => new Rect2(s.Position, s.Texture.GetSize() * s.Scale));
         _body = body;
     }
 
@@ -336,26 +338,23 @@ public class Destroyer : Sprite
     // Called every frame. 'delta' is the elapsed time since the previous frame.
     public override void _Process(float delta)
     {
-        if (_player.IsPlaying())
-        {
-            return;
-        }
+        KeyValuePair<Sprite, Rect2> underFire = _destroyed.FirstOrDefault(sr =>
+            sr.Value.Intersects(new Rect2(Position, 55, 55)));
 
-        Sprite underFire = _destroyed
-            .Find(s =>
-            {
-                var rect = new Rect2(s.Position, s.Texture.GetSize() * s.Scale);
-                return rect.Intersects(new Rect2(Position, 55, 55));
-            });
-
-        if (underFire == null)
+        if (underFire.Key == null)
         {
             return;
         }
 
         _destroyed.Remove(underFire);
+        EmitSignal(nameof(HitSignal), underFire.Key);
+
+        if (_player.IsPlaying())
+        {
+            return;
+        }
+
         _player.Play(FireAnim);
-        EmitSignal(nameof(HitSignal), underFire);
     }
 
     public void Kill()
