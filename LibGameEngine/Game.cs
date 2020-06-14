@@ -362,8 +362,20 @@ namespace GameEngine
         {
             var rnd = new Random();
 
-            bool vertical = rnd.Next(2) > 0;
-            ItemShape shape = rnd.Next(2) > 0
+            bool vertical;
+            switch (bonus)
+            {
+                case ItemShape.HLine:
+                    vertical = false;
+                    break;
+                case ItemShape.VLine:
+                    vertical = true;
+                    break;
+                default:
+                    vertical = rnd.Next(2) == 0;
+                    break;
+            }
+            ItemShape shape = rnd.Next(2) == 0
                 ? ItemShape.Ball
                 : ItemShape.Cube;
             int color = rnd.Next(shape == ItemShape.Ball ? 3 : 2) + 1;

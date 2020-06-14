@@ -1,11 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Threading.Tasks;
 using GameEngine;
 using Godot;
-using Environment = System.Environment;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable CheckNamespace
@@ -26,7 +23,7 @@ public class GameScene : Node2D
     private Tween _tween;
     public TextureRect ItemTable { get; private set; }
 
-    private int _hiScores;
+    private int _hiScores = 4280; // Cthulhu's record
     private Label _lblScores;
     private Label _lblHiScores;
     private Label _lblTime;
@@ -59,6 +56,7 @@ public class GameScene : Node2D
         LoadHiScores();
         UpdLblTime();
         UpdLblScores();
+        UpdLblHiScores();
         SpawnSprites();
         
         _timer.Start();
@@ -70,7 +68,7 @@ public class GameScene : Node2D
 //      
 //  }
 
-    private void OnSpriteClicked(int x, int y)
+    private void OnSpriteClick(int x, int y)
     {
         if (_inProcess)
         {
@@ -215,7 +213,7 @@ public class GameScene : Node2D
                 Sprite s = ItemSprites[x, y];
                 if (s != null && s.GetRect().HasPoint(s.ToLocal(evt.Position)))
                 {
-                    OnSpriteClicked(x, y);
+                    OnSpriteClick(x, y);
                 }
             }
         }
@@ -226,14 +224,19 @@ public class GameScene : Node2D
         _lblTime.Text = $"Time:{Game.TimeLeftSec:D2}sec";
     }
 
+    private void UpdLblHiScores()
+    {
+        _lblHiScores.Text = $"HiScores:{_hiScores:D}";
+    }
+    
     public void UpdLblScores()
     {
         _lblScores.Text = $"Scores:{Game.Scores:D}";
         if (Game.Scores > _hiScores)
         {
             _hiScores = Game.Scores;
+            UpdLblHiScores();
         }
-        _lblHiScores.Text = $"HiScores:{_hiScores:D}";
     }
 
     private void LoadHiScores()
@@ -247,7 +250,6 @@ public class GameScene : Node2D
         }
         else
         {
-            _hiScores = 4280;
             GD.PrintErr($"LoadHiScores. Err: {res}, File: {RecordsFilePath}");
         }
         records.Close();
@@ -264,7 +266,6 @@ public class GameScene : Node2D
         }
         else
         {
-            _hiScores = 4280;
             GD.PrintErr($"SaveHiScores. Err: {res}, File: {RecordsFilePath}");
         }
         records.Close();
@@ -324,7 +325,7 @@ public class GameScene : Node2D
         };
         if (item.Shape == ItemShape.VLine)
         {
-            sprite.Rotation = (float) (90f * (Math.PI / 180f));
+            sprite.RotationDegrees = 90;
         }
 
         return sprite;
@@ -352,10 +353,7 @@ public class GameScene : Node2D
         if (ItemSprites[x, y] != null)
         {
             GD.PrintErr($"Doubled Sprite!!! {x}:{y} {item}");
-            Environment.StackTrace
-                .Split(Environment.NewLine)
-                .ToList()
-                .ForEach(l => GD.PrintErr(l));
+            GD.PrintStack();
         }
 
         ItemSprites[x, y] = sprite;
