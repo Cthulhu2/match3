@@ -142,7 +142,6 @@ public class GameScene : Node2D
                 break;
 
             case FallDownAction fdAct:
-            {
                 Task tFall = FallDownAct.Exec(ItemSprites, fdAct, _tween);
 
                 if (_actions.Peek() is SpawnAction)
@@ -153,14 +152,11 @@ public class GameScene : Node2D
 
                 await tFall;
                 break;
-            }
 
             case SpawnAction spAct:
                 await SpawnAct.Exec(this, spAct, _tween);
                 break;
         }
-
-        await Task.CompletedTask;
     }
 
     public override void _Input(InputEvent evt)
@@ -276,12 +272,9 @@ public class GameScene : Node2D
         Game.Tick();
         if (Game.IsOver)
         {
+            _timer.Stop();
             SaveHiScores();
             GetTree().ChangeScene("res://GameOver/GameOver.tscn");
-        }
-        else
-        {
-            _timer.Start();
         }
 
         UpdLblTime();
