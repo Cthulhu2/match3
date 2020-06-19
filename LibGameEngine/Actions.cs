@@ -54,7 +54,7 @@ namespace GameEngine
         }
     }
 
-    public class FallDownPos
+    public struct FallDownPos
     {
         public Point SrcPos { get; }
         public Point DestPos { get; }
@@ -63,27 +63,6 @@ namespace GameEngine
         {
             SrcPos = src;
             DestPos = dest;
-        }
-
-        private bool Equals(FallDownPos other)
-        {
-            return SrcPos.Equals(other.SrcPos) && DestPos.Equals(other.DestPos);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((FallDownPos) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (SrcPos.GetHashCode() * 397) ^ DestPos.GetHashCode();
-            }
         }
     }
 
@@ -101,28 +80,6 @@ namespace GameEngine
         {
             Pos = pos;
             Item = item;
-        }
-
-        private bool Equals(ItemPos other)
-        {
-            return Pos.Equals(other.Pos) && Equals(Item, other.Item);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((ItemPos) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (Pos.GetHashCode() * 397)
-                       ^ (Item != null ? Item.GetHashCode() : 0);
-            }
         }
 
         public string Dump()

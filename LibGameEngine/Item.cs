@@ -58,31 +58,5 @@ namespace GameEngine
                     return "nil";
             }
         }
-
-        private bool Equals(Item other)
-        {
-            return Color == other.Color
-                   && Shape == other.Shape
-                   && Score == other.Score;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Item) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = Color;
-                hashCode = (hashCode * 397) ^ (int) Shape;
-                hashCode = (hashCode * 397) ^ Score;
-                return hashCode;
-            }
-        }
     }
 }
