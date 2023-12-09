@@ -8,18 +8,15 @@ Build lines from 3 or more elements and get scores!
 
 ## Build
 
+[Scripting / C#/.NET / C# basics](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html#c-basics)
+
 ### Requirements:
-* .NET Framework 4.7.2;
-* [Godot 3.2.2 beta 4 DevSnapshot](https://godotengine.org/article/dev-snapshot-godot-3-2-2-beta-4),
-  Mono version
-  ([builds](https://downloads.tuxfamily.org/godotengine/3.2/beta4/mono/));
-* MSBuild (from
-  [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools) or the
-  [Mono SDK](https://www.mono-project.com/download/stable/));
+* [.NET SDK 8.0](https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian);
+* [Godot Engine 4.2 Stable - .NET](https://godotengine.org/download/archive/4.2-stable/);
 * External Editor (MonoDevelop, Visual Studio Code, JetBrains Rider) 
 
-Credits
--------
+# Credits
+
 * Font "PressStart2P". Thanks very much to
   [CodeMan38](https://github.com/codeman38) for the font. Also see
   [SIL OPEN FONT LICENSE Version 1.1](https://github.com/Cthulhu2/match3/blob/master/Match3Godot/Font/OFL.txt)

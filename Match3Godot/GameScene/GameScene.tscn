@@ -1,255 +1,276 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=21 format=3 uid="uid://nniapyvf125s"]
 
-[ext_resource path="res://GameScene/GameScene.cs" type="Script" id=1]
-[ext_resource path="res://GameScene/Art/ItemTable.png" type="Texture" id=2]
-[ext_resource path="res://GameScene/Art/Bomb_Exploded.png" type="Texture" id=3]
-[ext_resource path="res://GameScene/Art/Bomb_Blue_Fire_2.png" type="Texture" id=4]
-[ext_resource path="res://GameScene/ItemSelTween.cs" type="Script" id=5]
-[ext_resource path="res://GameScene/Art/Bomb_Blue_Fire_1.png" type="Texture" id=6]
-[ext_resource path="res://GameScene/Art/Bomb_Grey_Fire_2.png" type="Texture" id=7]
-[ext_resource path="res://GameScene/Art/Bomb_Green_Fire_2.png" type="Texture" id=8]
-[ext_resource path="res://GameScene/Art/Bomb_Grey_Fire_1.png" type="Texture" id=9]
-[ext_resource path="res://GameScene/Art/Bomb_Green_Fire_1.png" type="Texture" id=10]
-[ext_resource path="res://GameScene/Art/Destroyer_Fire.png" type="Texture" id=11]
-[ext_resource path="res://GameScene/Art/Destroyer.png" type="Texture" id=12]
-[ext_resource path="res://Font/PressStart2P.tres" type="DynamicFont" id=13]
+[ext_resource type="Script" path="res://GameScene/GameScene.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://dgan3yw2d0eoy" path="res://GameScene/Art/ItemTable.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://cpsjp2dbume2y" path="res://GameScene/Art/Bomb_Exploded.png" id="3"]
+[ext_resource type="FontFile" uid="uid://chypvumjithj8" path="res://Font/PressStart2P-Regular.ttf" id="3_suegi"]
+[ext_resource type="Texture2D" uid="uid://degnhpaspjraq" path="res://GameScene/Art/Bomb_Blue_Fire_2.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://dl425esbv30fn" path="res://GameScene/Art/Bomb_Blue_Fire_1.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://dy1v7wkip1d8k" path="res://GameScene/Art/Bomb_Grey_Fire_2.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://c2wwsmj6fobk5" path="res://GameScene/Art/Bomb_Green_Fire_2.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://qleayc87o2ne" path="res://GameScene/Art/Bomb_Grey_Fire_1.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://ih1uhaljpc2r" path="res://GameScene/Art/Bomb_Green_Fire_1.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://ejcjisop2hlb" path="res://GameScene/Art/Destroyer_Fire.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://3h03rqpiscs5" path="res://GameScene/Art/Destroyer.png" id="12"]
+[ext_resource type="FontFile" path="res://Font/PressStart2P.tres" id="13"]
+[ext_resource type="Script" path="res://GameScene/ItemSelTween.cs" id="13_h6f76"]
 
-[sub_resource type="SpriteFrames" id=1]
-animations = [ {
-"frames": [ ExtResource( 6 ), ExtResource( 4 ), ExtResource( 3 ), ExtResource( 10 ), ExtResource( 8 ), ExtResource( 3 ), ExtResource( 9 ), ExtResource( 7 ), ExtResource( 3 ), ExtResource( 12 ), ExtResource( 11 ) ],
+[sub_resource type="SpriteFrames" id="1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11")
+}],
 "loop": true,
-"name": "default",
+"name": &"default",
 "speed": 5.0
-} ]
+}]
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id="2"]
 resource_name = "Bomb_Blue_Explosion"
 length = 0.5
-loop = true
+loop_mode = 1
 step = 0.05
 tracks/0/type = "value"
-tracks/0/path = NodePath("AnimatedSprite:frame")
-tracks/0/interp = 0
-tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.001, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.001, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 2,
-"values": [ 0, 0, 1, 2 ]
+"values": [0, 0, 1, 2]
 }
 tracks/1/type = "value"
-tracks/1/path = NodePath("AnimatedSprite:scale")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 0.2, 0.5 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.2, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [ Vector2( 5, 5 ), Vector2( 5, 5 ), Vector2( 15, 15 ) ]
+"values": [Vector2(5, 5), Vector2(5, 5), Vector2(15, 15)]
 }
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id="3"]
 resource_name = "Bomb_Green_Explosion"
 length = 0.5
-loop = true
+loop_mode = 1
 tracks/0/type = "value"
-tracks/0/path = NodePath("AnimatedSprite:frame")
-tracks/0/interp = 0
-tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 2,
-"values": [ 3, 4, 5 ]
+"values": [3, 4, 5]
 }
 tracks/1/type = "value"
-tracks/1/path = NodePath("AnimatedSprite:scale")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 0.199942, 0.49302 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.199942, 0.49302),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [ Vector2( 5, 5 ), Vector2( 5, 5 ), Vector2( 15, 15 ) ]
+"values": [Vector2(5, 5), Vector2(5, 5), Vector2(15, 15)]
 }
 
-[sub_resource type="Animation" id=4]
+[sub_resource type="Animation" id="4"]
 resource_name = "Bomb_Grey_Explosion"
 length = 0.5
-loop = true
+loop_mode = 1
 tracks/0/type = "value"
-tracks/0/path = NodePath("AnimatedSprite:frame")
-tracks/0/interp = 0
-tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 2,
-"values": [ 6, 7, 8 ]
+"values": [6, 7, 8]
 }
 tracks/1/type = "value"
-tracks/1/path = NodePath("AnimatedSprite:scale")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 0.2, 0.5 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.2, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [ Vector2( 5, 5 ), Vector2( 5, 5 ), Vector2( 15, 15 ) ]
+"values": [Vector2(5, 5), Vector2(5, 5), Vector2(15, 15)]
 }
 
-[sub_resource type="Animation" id=5]
+[sub_resource type="Animation" id="5"]
 resource_name = "Destroyer_Fire"
 length = 0.31
 tracks/0/type = "value"
-tracks/0/path = NodePath("AnimatedSprite:frame")
-tracks/0/interp = 0
-tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.300768 ),
-"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.300768),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 2,
-"values": [ 9, 10, 9, 10, 9, 10, 9 ]
+"values": [9, 10, 9, 10, 9, 10, 9]
 }
 tracks/1/type = "value"
-tracks/1/path = NodePath("AnimatedSprite:scale")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [ Vector2( 5, 5 ) ]
+"values": [Vector2(5, 5)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_0kjua"]
+_data = {
+"Bomb_Blue_Explosion": SubResource("2"),
+"Bomb_Green_Explosion": SubResource("3"),
+"Bomb_Grey_Explosion": SubResource("4"),
+"Destroyer_Fire": SubResource("5")
 }
 
 [node name="Node2D" type="Node2D"]
-script = ExtResource( 1 )
+script = ExtResource("1")
 
 [node name="Canvas" type="CanvasLayer" parent="."]
 
 [node name="Background" type="ColorRect" parent="Canvas"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -512.0
-margin_top = -300.0
-margin_right = 512.0
-margin_bottom = 300.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+color = Color(0.0823529, 0.0823529, 0.0823529, 1)
 
 [node name="LblScores" type="Label" parent="Canvas"]
-margin_left = 20.0
-margin_right = 512.0
-margin_bottom = 50.0
-custom_fonts/font = ExtResource( 13 )
-custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
-custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+offset_left = 20.0
+offset_right = 512.0
+offset_bottom = 50.0
+theme_type_variation = &"HeaderLarge"
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_shadow_color = Color(0.262745, 0.262745, 0.262745, 1)
+theme_override_fonts/font = ExtResource("13")
 text = "Scores:0"
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+vertical_alignment = 1
 
 [node name="LblHiScores" type="Label" parent="Canvas"]
-anchor_left = 1.0
-anchor_right = 1.0
-margin_left = -512.0
-margin_right = -20.0
-margin_bottom = 50.0
-custom_fonts/font = ExtResource( 13 )
-custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
-custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+anchors_preset = -1
+anchor_left = 0.556
+anchor_right = 0.556
+offset_left = -0.512085
+offset_right = 491.488
+offset_bottom = 50.0
+grow_horizontal = 0
+size_flags_horizontal = 4
+theme_type_variation = &"HeaderLarge"
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_shadow_color = Color(0.262745, 0.262745, 0.262745, 1)
+theme_override_fonts/font = ExtResource("3_suegi")
 text = "HiScores:0"
-align = 2
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+vertical_alignment = 1
 
 [node name="LblTime" type="Label" parent="Canvas"]
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-margin_left = -512.0
-margin_top = -50.0
-margin_right = 512.0
-margin_bottom = -2.0
-custom_fonts/font = ExtResource( 13 )
-custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
-custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+offset_left = -512.0
+offset_top = -50.0
+offset_right = 512.0
+offset_bottom = -2.0
+theme_type_variation = &"HeaderLarge"
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_shadow_color = Color(0.262745, 0.262745, 0.262745, 1)
+theme_override_fonts/font = ExtResource("13")
 text = "Time:60sec"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false,
-"_editor_description_": ""
-}
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ItemTable" type="TextureRect" parent="Canvas"]
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -300.0
-margin_top = -250.0
-margin_right = 300.0
-margin_bottom = 250.0
-texture = ExtResource( 2 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+texture = ExtResource("2")
+expand_mode = 1
 
-[node name="AnimTemplate" type="Position2D" parent="Canvas"]
+[node name="AnimTemplate" type="Marker2D" parent="Canvas"]
 visible = false
-position = Vector2( 309.941, 118.433 )
-skew = 4.37114e-08
+position = Vector2(309.941, 118.433)
 
-[node name="AnimatedSprite" type="AnimatedSprite" parent="Canvas/AnimTemplate"]
-position = Vector2( -3, -2 )
-scale = Vector2( 5, 5 )
-skew = 4.37114e-08
-frames = SubResource( 1 )
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Canvas/AnimTemplate"]
+position = Vector2(-3, -2)
+scale = Vector2(5, 5)
+sprite_frames = SubResource("1")
 frame = 6
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Canvas/AnimTemplate"]
-anims/Bomb_Blue_Explosion = SubResource( 2 )
-anims/Bomb_Green_Explosion = SubResource( 3 )
-anims/Bomb_Grey_Explosion = SubResource( 4 )
-anims/Destroyer_Fire = SubResource( 5 )
+libraries = {
+"": SubResource("AnimationLibrary_0kjua")
+}
 
 [node name="GameTimer" type="Timer" parent="."]
 wait_time = 60.0
 autostart = true
 
-[node name="ItemSelTween" type="Tween" parent="."]
-repeat = true
-playback/repeat = true
-script = ExtResource( 5 )
-
-[node name="Tween" type="Tween" parent="."]
+[node name="ItemSelTween" type="Node2D" parent="."]
+script = ExtResource("13_h6f76")

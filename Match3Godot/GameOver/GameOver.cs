@@ -3,7 +3,7 @@ using Godot;
 // ReSharper disable UnusedType.Global
 // ReSharper disable CheckNamespace
 
-public class GameOver : Node2D
+public partial class GameOver : Node2D
 {
     private Button _btnOk;
 
@@ -11,7 +11,7 @@ public class GameOver : Node2D
     public override void _Ready()
     {
         _btnOk = GetNode<Button>("CanvasLayer/BtnOk");
-        _btnOk.Connect("pressed", this, nameof(OnOkPressed));
+        _btnOk.Connect("pressed", new Callable(this, nameof(OnOkPressed)));
     }
 
 //  // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -22,6 +22,6 @@ public class GameOver : Node2D
 
     private void OnOkPressed()
     {
-        GetTree().ChangeScene("res://MainMenu/MainMenu.tscn");
+        GetTree().ChangeSceneToFile("res://MainMenu/MainMenu.tscn");
     }
 }

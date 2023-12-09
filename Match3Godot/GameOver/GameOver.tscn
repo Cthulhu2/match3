@@ -1,64 +1,54 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=3 uid="uid://boburr32egmve"]
 
-[ext_resource path="res://GameOver/GameOver.cs" type="Script" id=1]
-[ext_resource path="res://Font/PressStart2P.tres" type="DynamicFont" id=2]
+[ext_resource type="Script" path="res://GameOver/GameOver.cs" id="1"]
+[ext_resource type="FontFile" path="res://Font/PressStart2P.tres" id="2"]
 
-[sub_resource type="InputEventKey" id=1]
-pressed = true
-scancode = 32
-
-[sub_resource type="ShortCut" id=2]
-shortcut = SubResource( 1 )
+[sub_resource type="Shortcut" id="2"]
 
 [node name="Node2D" type="Node2D"]
-script = ExtResource( 1 )
+script = ExtResource("1")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Background" type="ColorRect" parent="CanvasLayer"]
-margin_top = 1.36038
-margin_right = 1024.0
-margin_bottom = 601.36
-color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0823529, 0.0823529, 0.0823529, 1)
 
 [node name="BtnOk" type="Button" parent="CanvasLayer"]
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.583
 anchor_right = 0.5
 anchor_bottom = 0.583
-margin_left = -199.056
-margin_top = -50.0
-margin_right = 200.944
-margin_bottom = 50.0
-custom_fonts/font = ExtResource( 2 )
-custom_colors/font_color_disabled = Color( 0.572549, 0, 0, 1 )
-custom_colors/font_color = Color( 0.839216, 0, 0, 1 )
-custom_colors/font_color_hover = Color( 1, 0, 0, 1 )
-custom_colors/font_color_pressed = Color( 0.572549, 0, 0, 1 )
-shortcut = SubResource( 2 )
+offset_left = -199.056
+offset_top = -50.0
+offset_right = 200.944
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.839216, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.572549, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(1, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.572549, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2")
+shortcut = SubResource("2")
 text = "OK"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="LblGameOver" type="Label" parent="CanvasLayer"]
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.4
 anchor_right = 0.5
 anchor_bottom = 0.4
-margin_left = -200.0
-margin_top = -48.1122
-margin_right = 200.0
-margin_bottom = 51.8878
-custom_fonts/font = ExtResource( 2 )
-custom_colors/font_color = Color( 0.690196, 0.690196, 0.690196, 1 )
-custom_colors/font_color_shadow = Color( 0.262745, 0.262745, 0.262745, 1 )
+offset_left = -200.0
+offset_top = -48.1122
+offset_right = 200.0
+offset_bottom = 51.8878
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_shadow_color = Color(0.262745, 0.262745, 0.262745, 1)
+theme_override_fonts/font = ExtResource("2")
 text = "Game Over"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+horizontal_alignment = 1
+vertical_alignment = 1

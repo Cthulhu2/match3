@@ -5,34 +5,30 @@ using System.Threading.Tasks;
 using GameEngine;
 using Godot;
 using Environment = System.Environment;
-using Object = Godot.Object;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 // ReSharper disable ParameterTypeCanBeEnumerable.Local
 // ReSharper disable CheckNamespace
 
-public class DestroyAct : Object
+public partial class DestroyAct : GodotObject
 {
     private readonly Node2D _animTemplate;
     private readonly GameScene _scene;
-    private readonly Sprite[,] _sprites;
+    private readonly Sprite2D[,] _sprites;
     private readonly DestroyAction _act;
-    private readonly Tween _tween;
-    private readonly Dictionary<Sprite, ItemPos> _destroyedBy;
+    private readonly Dictionary<Sprite2D, ItemPos> _destroyedBy;
 
     private DestroyAct(GameScene scene,
-                       Sprite[,] itemSprites,
+                       Sprite2D[,] itemSprites,
                        DestroyAction act,
-                       Tween tween,
                        Node2D animTemplate)
     {
         _scene = scene;
         _sprites = itemSprites;
         _act = act;
-        _tween = tween;
         _animTemplate = animTemplate;
         //
-        _destroyedBy = new Dictionary<Sprite, ItemPos>();
+        _destroyedBy = new Dictionary<Sprite2D, ItemPos>();
         foreach (ItemPos dPos in _act.DestroyedBy.Values.SelectMany(p => p))
         {
             _destroyedBy[_sprites[dPos.Pos.X, dPos.Pos.Y]] = dPos;
@@ -40,12 +36,11 @@ public class DestroyAct : Object
     }
 
     public static async Task Exec(GameScene scene,
-                                  Sprite[,] sprites,
+                                  Sprite2D[,] sprites,
                                   DestroyAction act,
-                                  Tween tween,
                                   Node2D animTemplate)
     {
-        await new DestroyAct(scene, sprites, act, tween, animTemplate).Exec();
+        await new DestroyAct(scene, sprites, act, animTemplate).Exec();
     }
 
     private async Task Exec()
@@ -57,10 +52,7 @@ public class DestroyAct : Object
                 return DestroyItem(dPos, 0);
             })
             .ToList();
-
-        _tween.Start();
-        await ToSignal(_tween, "tween_all_completed");
-        _tween.RemoveAll();
+        
         foreach (Task task in destroyedBy)
         {
             await task;
@@ -79,27 +71,33 @@ public class DestroyAct : Object
 
         if (_act.SpawnBonuses.Length > 0)
         {
+            Tween tween = _scene.CreateTween().SetLoops(1).SetParallel();
             foreach (ItemPos spPos in _act.SpawnBonuses)
             {
-                Sprite itemSprite = _scene
+                Sprite2D itemSprite = _scene
                     .SpawnSprite(spPos.Pos.X, spPos.Pos.Y, spPos.Item);
                 itemSprite.Scale = new Vector2(5, 0);
                 itemSprite.Visible = true;
-                BonusSpawnTween(itemSprite);
+                BonusSpawnTween(tween, itemSprite);
             }
-
-            _tween.Start();
-            await ToSignal(_tween, "tween_all_completed");
-            _tween.RemoveAll();
+            tween.Play();
+            await ToSignal(tween, Tween.SignalName.Finished);
+            tween.Stop();
+            tween.Kill();
         }
     }
 
     private async Task DestroyItem(ItemPos dPos, float delay)
     {
-        Sprite sprite = _sprites[dPos.Pos.X, dPos.Pos.Y];
+        Sprite2D sprite = _sprites[dPos.Pos.X, dPos.Pos.Y];
         if (dPos.Item.IsRegularShape)
         {
-            RegularDestroyTween(sprite, delay);
+            Tween tween = _scene.CreateTween().SetLoops(1).SetParallel();
+            RegularDestroyTween(tween, sprite, delay);
+            tween.Play();
+            await ToSignal(tween, Tween.SignalName.Finished);
+            tween.Stop();
+            tween.Kill();
         }
         else if (dPos.Item.IsBombShape)
         {
@@ -107,47 +105,54 @@ public class DestroyAct : Object
         }
         else if (dPos.Item.IsLineShape)
         {
-            LineDestroy(dPos, sprite, _act.DestroyedBy[dPos]);
+            Tween tween = _scene.CreateTween().SetLoops(1).SetParallel();
+            LineDestroy(tween, dPos, sprite, _act.DestroyedBy[dPos]);
+            tween.Play();
+            await ToSignal(tween, Tween.SignalName.Finished);
+            tween.Stop();
+            tween.Kill();
         }
     }
 
-    private void RegularDestroyTween(Sprite sprite, float delay)
+    private static void RegularDestroyTween(Tween tween, Sprite2D sprite, float delay)
     {
-        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
-            sprite.Scale.y, 0,
-            0.25f, Tween.TransitionType.Quad, Tween.EaseType.Out,
-            delay);
+        tween.TweenProperty(sprite, "scale:y", 0, 0.25f)
+            .From(sprite.Scale.Y)
+            .SetTrans(Tween.TransitionType.Quad)
+            .SetEase(Tween.EaseType.Out)
+            .SetDelay(delay);
 
-        _tween.InterpolateProperty(sprite, new NodePath("position:y"),
-            sprite.Position.y, sprite.Position.y + sprite.GetRect().Size.y,
-            0.25f, Tween.TransitionType.Quad, Tween.EaseType.Out,
-            delay);
+        tween.TweenProperty(sprite, "position:y",
+                sprite.Position.Y + sprite.GetRect().Size.Y, 0.25f)
+            .From(sprite.Position.Y)
+            .SetTrans(Tween.TransitionType.Quad)
+            .SetEase(Tween.EaseType.Out)
+            .SetDelay(delay);
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter
-    private void BonusSpawnTween(Sprite sprite)
+    private static void BonusSpawnTween(Tween tween, Sprite2D sprite)
     {
-        _tween.InterpolateProperty(sprite, new NodePath("scale:y"),
-            0, 5,
-            0.125f, Tween.TransitionType.Quad, Tween.EaseType.In,
-            0.125f);
+        tween.TweenProperty(sprite, "scale:y", 5, 0.125f)
+            .From(0)
+            .SetTrans(Tween.TransitionType.Quad)
+            .SetEase(Tween.EaseType.In)
+            .SetDelay(0.125f);
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter
     private async Task BombDestroy(int color,
-                                   Sprite bomb,
+                                   Sprite2D bomb,
                                    ItemPos[] destroyedPos)
     {
         var bombExp = (Node2D) _animTemplate.Duplicate();
-        var player =
-            bombExp.GetNode<AnimationPlayer>(new NodePath("AnimationPlayer"));
+        var player = bombExp.GetNode<AnimationPlayer>(new NodePath("AnimationPlayer"));
         bomb.GetParent().AddChild(bombExp);
         bombExp.Position = bomb.Position;
-        var sprite =
-            bombExp.GetNode<AnimatedSprite>(new NodePath("AnimatedSprite"));
+        var sprite = bombExp.GetNode<AnimatedSprite2D>(new NodePath("AnimatedSprite2D"));
         sprite.Frame = GameScene.BombAnimFirstFrame[color];
         string animName = $"Bomb_{GameScene.Colors[color]}_Explosion";
-        player.GetAnimation(animName).Loop = false; // Sometimes it's true(???)
+        player.GetAnimation(animName).LoopMode = Animation.LoopModeEnum.None; // Sometimes it's true(???)
         player.Play(animName);
         bombExp.Visible = true;
         bomb.Visible = false; // removed later in Exec
@@ -161,7 +166,10 @@ public class DestroyAct : Object
             })
             .ToList();
 
-        await ToSignal(player, "animation_finished");
+        await ToSignal(player, AnimationMixer.SignalName.AnimationFinished);
+
+        bombExp.GetParent().RemoveChild(bombExp);
+        bombExp.QueueFree();
 
         List<Task> bonusDestroyedBy = destroyedPos
             .Where(p => !p.Item.IsRegularShape)
@@ -181,74 +189,76 @@ public class DestroyAct : Object
         {
             await bonus;
         }
-
-        bombExp.GetParent().RemoveChild(bombExp);
-        bombExp.QueueFree();
     }
 
-    private void DestroyerLMovTween(Destroyer destroyer)
+    private void DestroyerLMovTween(Tween tween, Destroyer destroyer)
     {
         const float toX = 0;
-        float distance = Math.Abs(toX - destroyer.Position.x);
+        float distance = Math.Abs(toX - destroyer.Position.X);
         float time = distance / Destroyer.Speed;
 
-        _tween.InterpolateProperty(destroyer, new NodePath("position:x"),
-            destroyer.Position.x, toX,
-            time, Tween.TransitionType.Linear, Tween.EaseType.In);
+        tween.TweenProperty(destroyer, "position:x", toX, time)
+            .From(destroyer.Position.X)
+            .SetTrans(Tween.TransitionType.Linear)
+            .SetEase(Tween.EaseType.In);
 
-        _tween.InterpolateCallback(destroyer, time, nameof(destroyer.Kill));
+        tween.TweenCallback(Callable.From(destroyer.Kill)).SetDelay(time);
     }
 
-    private void DestroyerRMovTween(Destroyer destroyer)
+    private void DestroyerRMovTween(Tween tween, Destroyer destroyer)
     {
-        float toX = _scene.ItemTable.RectSize.x;
-        float distance = Math.Abs(toX - destroyer.Position.x);
+        float toX = _scene.ItemTable.Size.X;
+        float distance = Math.Abs(toX - destroyer.Position.X);
         float time = distance / Destroyer.Speed;
 
-        _tween.InterpolateProperty(destroyer, new NodePath("position:x"),
-            destroyer.Position.x, toX,
-            time, Tween.TransitionType.Linear, Tween.EaseType.In);
+        tween.TweenProperty(destroyer, "position:x", toX, time)
+            .From(destroyer.Position.X)
+            .SetTrans(Tween.TransitionType.Linear)
+            .SetEase(Tween.EaseType.In);
 
-        _tween.InterpolateCallback(destroyer, time, nameof(destroyer.Kill));
+        tween.TweenCallback(Callable.From(destroyer.Kill)).SetDelay(time);
     }
 
-    private void DestroyerUMovTween(Destroyer destroyer)
+    private void DestroyerUMovTween(Tween tween, Destroyer destroyer)
     {
         const float toY = 0;
-        float distance = Math.Abs(toY - destroyer.Position.y);
+        float distance = Math.Abs(toY - destroyer.Position.Y);
         float time = distance / Destroyer.Speed;
 
-        _tween.InterpolateProperty(destroyer, new NodePath("position:y"),
-            destroyer.Position.y, toY,
-            time, Tween.TransitionType.Linear, Tween.EaseType.In);
+        tween.TweenProperty(destroyer, "position:y", toY, time)
+            .From(destroyer.Position.Y)
+            .SetTrans(Tween.TransitionType.Linear)
+            .SetEase(Tween.EaseType.In);
 
-        _tween.InterpolateCallback(destroyer, time, nameof(destroyer.Kill));
+        tween.TweenCallback(Callable.From(destroyer.Kill)).SetDelay(time);
     }
 
-    private void DestroyerDMovTween(Destroyer destroyer)
+    private void DestroyerDMovTween(Tween tween, Destroyer destroyer)
     {
-        float toY = _scene.ItemTable.RectSize.y;
-        float distance = Math.Abs(toY - destroyer.Position.y);
+        float toY = _scene.ItemTable.Size.Y;
+        float distance = Math.Abs(toY - destroyer.Position.Y);
         float time = distance / Destroyer.Speed;
 
-        _tween.InterpolateProperty(destroyer, new NodePath("position:y"),
-            destroyer.Position.y, toY,
-            time, Tween.TransitionType.Linear, Tween.EaseType.In);
+        tween.TweenProperty(destroyer, "position:y", toY, time)
+            .From(destroyer.Position.Y)
+            .SetTrans(Tween.TransitionType.Linear)
+            .SetEase(Tween.EaseType.In);
 
-        _tween.InterpolateCallback(destroyer, time, nameof(destroyer.Kill));
+        tween.TweenCallback(Callable.From(destroyer.Kill)).SetDelay(time);
     }
 
-    private async void OnDestroyerHit(Sprite toHit)
+    private async void OnDestroyerHit(Sprite2D toHit)
     {
         ItemPos hit = _destroyedBy[toHit];
         await DestroyItem(hit, 0);
     }
 
-    private void LineDestroy(ItemPos linePos,
-                             Sprite line,
+    private void LineDestroy(Tween tween,
+                             ItemPos linePos,
+                             Sprite2D line,
                              ItemPos[] destroyedPos)
     {
-        Sprite[] destroyedSprites = destroyedPos
+        Sprite2D[] destroyedSprites = destroyedPos
             .Select(p => _scene.ItemSprites[p.Pos.X, p.Pos.Y])
             .ToArray();
 
@@ -284,35 +294,35 @@ public class DestroyAct : Object
 
         if (linePos.Item.Shape == ItemShape.HLine)
         {
-            DestroyerLMovTween(d1);
-            DestroyerRMovTween(d2);
+            DestroyerLMovTween(tween, d1);
+            DestroyerRMovTween(tween, d2);
         }
         else if (linePos.Item.Shape == ItemShape.VLine)
         {
-            DestroyerUMovTween(d1);
-            DestroyerDMovTween(d2);
+            DestroyerUMovTween(tween, d1);
+            DestroyerDMovTween(tween, d2);
         }
 
-        d1.Connect(nameof(Destroyer.HitSignal), this, nameof(OnDestroyerHit));
-        d2.Connect(nameof(Destroyer.HitSignal), this, nameof(OnDestroyerHit));
+        d1.HitSignal += OnDestroyerHit;
+        d2.HitSignal += OnDestroyerHit;
     }
 }
 
-public class Destroyer : Sprite
+public partial class Destroyer : Sprite2D
 {
     [Signal]
-    public delegate void HitSignal(Sprite toHit);
+    public delegate void HitSignalEventHandler(Sprite2D toHit);
 
     public const float Speed = 200f; // Pixels per second
 
     private const string FireAnim = "Destroyer_Fire";
 
-    private readonly IDictionary<Sprite, Rect2> _destroyed;
+    private readonly IDictionary<Sprite2D, Rect2> _destroyed;
     private readonly Node2D _body;
 
     private AnimationPlayer _player;
 
-    public Destroyer(Sprite[] destroyed, Node2D body)
+    public Destroyer(Sprite2D[] destroyed, Node2D body)
     {
         _destroyed = destroyed.ToDictionary(
             s => s,
@@ -326,9 +336,9 @@ public class Destroyer : Sprite
         _player =
             _body.GetNode<AnimationPlayer>(new NodePath("AnimationPlayer"));
         _player.CurrentAnimation = FireAnim;
-        _player.GetAnimation(FireAnim).Loop = false; // Sometimes it's true(???)
+        _player.GetAnimation(FireAnim).LoopMode = Animation.LoopModeEnum.None; // Sometimes it's true(???)
         var sprite =
-            _body.GetNode<AnimatedSprite>(new NodePath("AnimatedSprite"));
+            _body.GetNode<AnimatedSprite2D>(new NodePath("AnimatedSprite2D"));
         sprite.Frame = 9;
         AddChild(_body);
         _body.Position = new Vector2(0, 0);
@@ -336,9 +346,9 @@ public class Destroyer : Sprite
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        KeyValuePair<Sprite, Rect2> underFire = _destroyed.FirstOrDefault(sr =>
+        KeyValuePair<Sprite2D, Rect2> underFire = _destroyed.FirstOrDefault(sr =>
             sr.Value.Intersects(new Rect2(Position, 55, 55)));
 
         if (underFire.Key == null)

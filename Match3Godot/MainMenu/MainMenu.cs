@@ -1,27 +1,19 @@
 using Godot;
 
-// ReSharper disable UnusedType.Global
 // ReSharper disable CheckNamespace
 
-public class MainMenu : Node2D
+public partial class MainMenu : Node2D
 {
     private Button _btnPlay;
 
-    // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         _btnPlay = GetNode<Button>("CanvasLayer/BtnPlay");
-        _btnPlay.Connect("pressed", this, nameof(OnPlayPressed));
+        _btnPlay.Connect("pressed", Callable.From(this.OnPlayPressed));
     }
-
-//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-//  public override void _Process(float delta)
-//  {
-//      
-//  }
 
     private void OnPlayPressed()
     {
-        GetTree().ChangeScene("res://GameScene/GameScene.tscn");
+        GetTree().ChangeSceneToFile("res://GameScene/GameScene.tscn");
     }
 }

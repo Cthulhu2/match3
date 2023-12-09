@@ -2,10 +2,5 @@
 .idea/
 
 # LibGameEngine builds
-**/obj/Debug/
-**/obj/Release/
-**/bin/Debug/
-**/bin/Release/
-
-# NuGet packages
-packages/
+**/obj/
+**/bin/
